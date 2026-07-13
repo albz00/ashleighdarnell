@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Icon from '$lib/components/Icon.svelte';
 	import Floater from '$lib/components/Floater.svelte';
+	import Icon from '$lib/components/Icon.svelte';
 	import Placeholder from '$lib/components/Placeholder.svelte';
 	import Reveal from '$lib/components/Reveal.svelte';
 	import SectionLabel from '$lib/components/SectionLabel.svelte';
@@ -33,14 +33,12 @@
 	></div>
 	<div class="relative mx-auto max-w-6xl px-5 pt-16 pb-12 md:px-8 md:pt-24">
 		<Floater
-			icon="at"
 			tint="mint"
 			size="md"
 			class="top-10 right-8 hidden lg:flex"
 			style="animation-delay: -1.2s"
 		/>
 		<Floater
-			icon="spark"
 			tint="lilac"
 			size="sm"
 			spin="spin-wobble"

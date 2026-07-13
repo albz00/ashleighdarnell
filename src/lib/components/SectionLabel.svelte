@@ -16,7 +16,7 @@
 
 <p class="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.25em] text-muted">
 	<span class="inline-flex animate-spin-wobble">
-		<Icon name="asterisk" size={12} class={accents[accent]} />
+		<Icon name="spark" size={12} class={accents[accent]} />
 	</span>
 	{text}
 </p>

@@ -15,7 +15,6 @@
 
 <!-- ============ HERO + CREDIBILITY REGION (shared spotlights) ============ -->
 <div class="relative overflow-x-clip">
-	<!-- gradient spotlights -->
 	<div
 		class="animate-drift pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-coral/15 blur-3xl"
 	></div>
@@ -38,7 +37,7 @@
 				<Reveal delay={80}>
 					<h1 class="font-display mt-6 text-5xl leading-[1.05] tracking-tight md:text-7xl">
 						Lorem ipsum<br />
-						<span class="text-coral italic">dolor sit</span> amet
+						<span class="font-cursive text-[1.4em] leading-none text-coral">dolor sit</span> amet
 					</h1>
 				</Reveal>
 				<Reveal delay={160}>
@@ -68,14 +67,8 @@
 
 			<Reveal delay={120} class="relative">
 				<Placeholder label="hero portrait" ratio="4/5" tint="blush" />
+				<Floater tint="butter" size="lg" class="-bottom-6 -left-6 hidden md:flex" />
 				<Floater
-					icon="spark"
-					tint="butter"
-					size="lg"
-					class="-bottom-6 -left-6 hidden md:flex"
-				/>
-				<Floater
-					icon="asterisk"
 					tint="lilac"
 					size="sm"
 					motion="float"
@@ -87,7 +80,6 @@
 		</div>
 	</section>
 
-	<!-- ============ CREDIBILITY / MARQUEE STRIP ============ -->
 	<Wave fill="butter" />
 	<section class="bg-butter">
 		<div
@@ -95,15 +87,18 @@
 		>
 			<span>Consectetur adipiscing</span>
 			<span class="inline-flex animate-spin-slow">
-				<Icon name="asterisk" size={10} class="text-coral" />
+				<Icon name="spark" size={10} class="text-coral" />
 			</span>
 			<span>Sed do eiusmod</span>
-			<span class="inline-flex animate-spin-slow" style="animation-direction: reverse; animation-duration: 16s">
-				<Icon name="asterisk" size={10} class="text-teal" />
+			<span
+				class="inline-flex animate-spin-slow"
+				style="animation-direction: reverse; animation-duration: 16s"
+			>
+				<Icon name="spark" size={10} class="text-teal" />
 			</span>
 			<span>Ut labore et dolore</span>
 			<span class="hidden animate-spin-wobble md:inline-flex">
-				<Icon name="asterisk" size={10} class="text-violet" />
+				<Icon name="spark" size={10} class="text-violet" />
 			</span>
 			<span class="hidden md:block">Magna aliqua enim</span>
 		</div>
@@ -111,7 +106,6 @@
 	<Wave fill="butter" flip />
 </div>
 
-<!-- ============ TWO PORTFOLIO DOORS ============ -->
 <section class="mx-auto max-w-6xl px-5 py-20 md:px-8 md:py-28">
 	<Reveal>
 		<SectionLabel text="Two sides of the work" accent="violet" />
@@ -126,16 +120,9 @@
 				href="/photography"
 				class="card-lift group block rounded-3xl border border-line p-6 hover:border-coral/50 hover:bg-blush"
 			>
-				<div class="flex items-center justify-between">
-					<span class="inline-flex animate-spin-slower text-coral">
-						<Icon name="camera" size={22} />
-					</span>
-					<Icon
-						name="arrow"
-						size={18}
-						class="text-coral transition-transform duration-300 group-hover:translate-x-1.5"
-					/>
-				</div>
+				<span class="inline-flex animate-spin-slower text-coral">
+					<Icon name="spark" size={22} />
+				</span>
 				<Placeholder label="photography cover" ratio="16/10" tint="blush" class="mt-6" />
 				<h3 class="font-display mt-6 text-2xl">Photography</h3>
 				<p class="mt-2 text-sm text-muted">
@@ -149,16 +136,9 @@
 				href="/social"
 				class="card-lift group block rounded-3xl border border-line p-6 hover:border-teal/50 hover:bg-mint"
 			>
-			<div class="flex items-center justify-between">
-					<span class="inline-flex animate-spin-slower text-teal" style="animation-direction: reverse">
-						<Icon name="at" size={22} />
-					</span>
-					<Icon
-						name="arrow"
-						size={18}
-						class="text-teal transition-transform duration-300 group-hover:translate-x-1.5"
-					/>
-				</div>
+				<span class="inline-flex animate-spin-slower text-teal" style="animation-direction: reverse">
+					<Icon name="spark" size={22} />
+				</span>
 				<Placeholder label="social media cover" ratio="16/10" tint="mint" class="mt-6" />
 				<h3 class="font-display mt-6 text-2xl">Social Media</h3>
 				<p class="mt-2 text-sm text-muted">
@@ -169,7 +149,6 @@
 	</div>
 </section>
 
-<!-- ============ ABOUT TEASER ============ -->
 <Reveal>
 	<div class="flex justify-center">
 		<Squiggle class="text-marigold" />
@@ -204,7 +183,6 @@
 	</div>
 </section>
 
-<!-- ============ CONTACT CTA ============ -->
 <div class="relative overflow-x-clip">
 	<div
 		class="animate-drift pointer-events-none absolute top-0 left-1/4 h-80 w-80 rounded-full bg-coral/30 blur-3xl"

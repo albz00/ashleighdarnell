@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Icon from '$lib/components/Icon.svelte';
 	import Floater from '$lib/components/Floater.svelte';
+	import Icon from '$lib/components/Icon.svelte';
 	import Placeholder from '$lib/components/Placeholder.svelte';
 	import Reveal from '$lib/components/Reveal.svelte';
 	import SectionLabel from '$lib/components/SectionLabel.svelte';
@@ -30,9 +30,8 @@
 	>
 		<Reveal class="relative">
 			<Placeholder label="portrait" ratio="4/5" tint="lilac" />
-			<Floater icon="spark" tint="mint" size="md" class="-right-4 -bottom-4 hidden md:flex" />
+			<Floater tint="mint" size="md" class="-right-4 -bottom-4 hidden md:flex" />
 			<Floater
-				icon="asterisk"
 				tint="butter"
 				size="sm"
 				motion="float"
@@ -45,7 +44,7 @@
 			<div>
 				<SectionLabel text="About" accent="marigold" />
 				<h1 class="font-display mt-6 text-4xl leading-tight tracking-tight md:text-6xl">
-					Lorem ipsum <span class="text-violet italic">dolor sit</span> amet
+					Lorem ipsum <span class="font-cursive text-[1.4em] leading-none text-violet">dolor sit</span> amet
 				</h1>
 				<div class="mt-6 max-w-lg space-y-4 leading-relaxed text-muted">
 					<p>

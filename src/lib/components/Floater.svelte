@@ -2,7 +2,6 @@
 	import Icon from './Icon.svelte';
 
 	let {
-		icon = 'spark',
 		tint = 'butter',
 		motion = 'float-spin',
 		spin = 'spin-slow',
@@ -10,7 +9,6 @@
 		class: className = '',
 		style = undefined
 	}: {
-		icon?: 'spark' | 'asterisk' | 'camera' | 'at';
 		tint?: 'blush' | 'butter' | 'mint' | 'lilac' | 'paper';
 		motion?: 'float' | 'float-spin';
 		spin?: 'spin-slow' | 'spin-slower' | 'spin-wobble' | 'none';
@@ -53,5 +51,5 @@
 	{style}
 	aria-hidden="true"
 >
-	<Icon name={icon} size={iconSize} class={spins[spin]} />
+	<Icon name="spark" size={iconSize} class={spins[spin]} />
 </div>

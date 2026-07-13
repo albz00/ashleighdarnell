@@ -1,10 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { slide } from 'svelte/transition';
-	import Icon from './Icon.svelte';
 	import WavyEdge from './WavyEdge.svelte';
 
-	// each destination gets its own signature accent
 	const links = [
 		{ href: '/photography', label: 'Photography', underline: 'decoration-coral' },
 		{ href: '/social', label: 'Social Media', underline: 'decoration-teal' },
@@ -41,12 +39,24 @@
 			</nav>
 
 			<button
-				class="md:hidden"
+				class="flex h-8 w-8 flex-col items-center justify-center gap-1.5 md:hidden"
 				onclick={() => (menuOpen = !menuOpen)}
 				aria-expanded={menuOpen}
 				aria-label="Toggle menu"
 			>
-				<Icon name={menuOpen ? 'close' : 'menu'} size={24} />
+				<span
+					class="block h-0.5 w-5 bg-ink transition-transform duration-200 {menuOpen
+						? 'translate-y-[4px] rotate-45'
+						: ''}"
+				></span>
+				<span
+					class="block h-0.5 w-5 bg-ink transition-opacity duration-200 {menuOpen ? 'opacity-0' : ''}"
+				></span>
+				<span
+					class="block h-0.5 w-5 bg-ink transition-transform duration-200 {menuOpen
+						? '-translate-y-[4px] -rotate-45'
+						: ''}"
+				></span>
 			</button>
 		</div>
 

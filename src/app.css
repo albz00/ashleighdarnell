@@ -26,9 +26,10 @@
 	--color-mint: #d8f3ec;
 	--color-lilac: #e9e3ff;
 
-	/* type, swappable font stacks (display font TBD) */
-	--font-display: 'Georgia', 'Times New Roman', serif;
-	--font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+	/* type — uncommon pairing; no Inter / Fraunces / script clichés */
+	--font-display: 'Rosarivo', 'Times New Roman', serif;
+	--font-body: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+	--font-cursive: 'Corinthia', cursive;
 }
 
 html {
@@ -39,12 +40,24 @@ body {
 	background-color: var(--color-paper);
 	color: var(--color-ink);
 	font-family: var(--font-body);
+	font-optical-sizing: auto;
 	-webkit-font-smoothing: antialiased;
 }
 
-/* utility for the big editorial headlines */
+/* soft literary display — real stroke weight, not hairline fashion serif */
 .font-display {
 	font-family: var(--font-display);
+	font-weight: 400;
+	letter-spacing: 0.005em;
+}
+
+/* title flourishes — real cursive with enough weight to hold a headline */
+.font-cursive {
+	font-family: var(--font-cursive);
+	font-style: normal;
+	font-weight: 700;
+	letter-spacing: 0.01em;
+	line-height: 0.95;
 }
 
 /* ------------------------------------------------------------------

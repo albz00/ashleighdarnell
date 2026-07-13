@@ -22,7 +22,7 @@
 			<div>
 				<SectionLabel text="Contact" accent="violet" />
 				<h1 class="font-display mt-6 text-4xl leading-tight tracking-tight md:text-6xl">
-					Lorem ipsum <span class="text-coral italic">dolor sit</span> amet
+					Lorem ipsum <span class="font-cursive text-[1.4em] leading-none text-coral">dolor sit</span> amet
 				</h1>
 				<p class="mt-6 max-w-sm leading-relaxed text-muted">
 					Consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna
@@ -32,7 +32,7 @@
 				<div class="mt-10 space-y-4 text-sm">
 					<p class="flex items-center gap-3 text-muted">
 						<span class="inline-flex animate-spin-slow text-violet">
-							<Icon name="at" size={16} />
+							<Icon name="spark" size={16} />
 						</span>
 						lorem@ipsum.dolor
 					</p>

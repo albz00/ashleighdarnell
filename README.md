@@ -9,6 +9,21 @@ npm install
 npm run dev
 ```
 
+## Deploy (Cloudflare)
+
+Configured with `@sveltejs/adapter-cloudflare` and `wrangler.jsonc`.
+
+**Git integration (Cloudflare Pages / Workers):** connect this repo and use:
+- Build command: `npm run build`
+- Build output directory: `.svelte-kit/cloudflare`
+- Compatibility flag: `nodejs_als` (already set in `wrangler.jsonc`)
+
+**CLI:**
+
+```bash
+npm run deploy
+```
+
 ## Structure
 
 | Route | Purpose |
