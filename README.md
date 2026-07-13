@@ -13,10 +13,11 @@ npm run dev
 
 Configured with `@sveltejs/adapter-cloudflare` and `wrangler.jsonc`.
 
-**Git integration (Cloudflare Pages / Workers):** connect this repo and use:
+**Git integration (Cloudflare Pages):** connect this repo. `wrangler.jsonc` sets the output dir to `.svelte-kit/cloudflare` via `pages_build_output_dir`.
+
+If you configure build settings in the dashboard instead:
 - Build command: `npm run build`
 - Build output directory: `.svelte-kit/cloudflare`
-- Compatibility flag: `nodejs_als` (already set in `wrangler.jsonc`)
 
 **CLI:**
 
