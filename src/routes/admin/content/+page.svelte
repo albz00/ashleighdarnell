@@ -113,7 +113,7 @@
 	}
 
 	function setPath(path: string, value: string) {
-		const next = structuredClone(draft);
+		const next = structuredClone($state.snapshot(draft));
 		const keys = path.split('.');
 		let target = next[selectedPage] as unknown as Record<string, unknown>;
 		for (const key of keys.slice(0, -1)) {
@@ -131,8 +131,9 @@
 
 	async function save() {
 		try {
-			await savePageContent(structuredClone(draft));
-			$pageContent = structuredClone(draft);
+			const snapshot = structuredClone($state.snapshot(draft));
+			await savePageContent(snapshot);
+			$pageContent = snapshot;
 			notice = `${currentPage.label} content saved to Firebase.`;
 		} catch (error) {
 			notice = error instanceof Error ? error.message : 'Content could not be saved.';
@@ -141,7 +142,7 @@
 
 	async function resetCurrentPage() {
 		if (!window.confirm(`Reset all ${currentPage.label} content to its original values?`)) return;
-		const next = structuredClone(draft);
+		const next = structuredClone($state.snapshot(draft));
 		next[selectedPage] = structuredClone(defaultPageContent[selectedPage]) as never;
 		try {
 			await savePageContent(next);
