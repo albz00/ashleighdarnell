@@ -3,6 +3,7 @@
 	import Reveal from '$lib/components/Reveal.svelte';
 	import Wave from '$lib/components/Wave.svelte';
 	import { pageContent } from '$lib/content/page-content';
+	import { rotateMedia } from '$lib/actions/rotate-media';
 
 	let active = $state('All');
 
@@ -23,7 +24,11 @@
 	<title>{photography.seoTitle}</title>
 </svelte:head>
 
-<section class="backdrop-forest bg-paper" style:--managed-bg={'url("' + photography.background.src + '")'}>
+<section
+	class="backdrop-forest relative bg-paper"
+	style:--managed-bg={'url("' + photography.background.src + '")'}
+	use:rotateMedia={{ media: photography.background, background: true }}
+>
 	<div class="mx-auto max-w-6xl px-5 pt-20 pb-16 md:px-8 md:pt-28 md:pb-20">
 		<div class="flex flex-wrap items-end justify-between gap-6">
 			<Reveal delay={80}>
@@ -38,6 +43,11 @@
 			</Reveal>
 		</div>
 	</div>
+	{#if photography.background.caption}
+		<p class="absolute bottom-4 right-5 rounded-full bg-ink/60 px-3 py-1.5 text-[10px] text-paper backdrop-blur-sm">
+			{photography.background.caption}
+		</p>
+	{/if}
 </section>
 
 <section class="sticky top-[100px] z-40 border-y border-line bg-paper/90 backdrop-blur md:top-[120px]">
@@ -61,7 +71,7 @@
 		{#each shots as shot, i (shot.src)}
 			<Reveal delay={(i % 3) * 70} class="break-inside-avoid">
 				<div class="page-polaroid group">
-					<Placeholder label={shot.caption || `photo ${i + 1}`} src={shot.src} alt={shot.alt} ratio={shot.ratio} tint={shot.tint} class="outline-frame" />
+					<Placeholder label={shot.caption || `photo ${i + 1}`} src={shot.src} alt={shot.alt} rotation={shot.rotation} rotationSeconds={shot.rotationSeconds} ratio={shot.ratio} tint={shot.tint} class="outline-frame" />
 					<p class="page-polaroid-caption">{shot.caption}</p>
 				</div>
 			</Reveal>

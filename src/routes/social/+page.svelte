@@ -3,6 +3,7 @@
 	import Reveal from '$lib/components/Reveal.svelte';
 	import Wave from '$lib/components/Wave.svelte';
 	import { pageContent } from '$lib/content/page-content';
+	import { rotateMedia } from '$lib/actions/rotate-media';
 
 	const social = $derived($pageContent.social);
 	const accents = ['text-coral', 'text-teal', 'text-violet'];
@@ -13,7 +14,11 @@
 	<title>{social.seoTitle}</title>
 </svelte:head>
 
-<section class="backdrop-studio bg-paper" style:--managed-bg={'url("' + social.background.src + '")'}>
+<section
+	class="backdrop-studio relative bg-paper"
+	style:--managed-bg={'url("' + social.background.src + '")'}
+	use:rotateMedia={{ media: social.background, background: true }}
+>
 	<div class="mx-auto max-w-6xl px-5 pt-20 pb-16 md:px-8 md:pt-28 md:pb-20">
 		<div class="flex flex-wrap items-end justify-between gap-6">
 			<Reveal delay={80}>
@@ -28,6 +33,11 @@
 			</Reveal>
 		</div>
 	</div>
+	{#if social.background.caption}
+		<p class="absolute bottom-4 right-5 rounded-full bg-ink/60 px-3 py-1.5 text-[10px] text-paper backdrop-blur-sm">
+			{social.background.caption}
+		</p>
+	{/if}
 </section>
 
 <section class="mx-auto max-w-6xl px-5 pt-12 md:px-8 md:pt-16">
@@ -70,7 +80,7 @@
 		{#each social.reels as reel, i (reel.src)}
 			<Reveal delay={i * 80}>
 				<div class="page-polaroid group {i % 2 ? 'md:mt-10' : ''}">
-					<Placeholder label={reel.caption || `reel ${i + 1}`} src={reel.src} alt={reel.alt} ratio="9/16" tint={reelTints[i] ?? 'mint'} class="outline-frame" />
+					<Placeholder label={reel.caption || `reel ${i + 1}`} src={reel.src} alt={reel.alt} rotation={reel.rotation} rotationSeconds={reel.rotationSeconds} ratio="9/16" tint={reelTints[i] ?? 'mint'} class="outline-frame" />
 					<p class="page-polaroid-caption">{reel.caption}</p>
 				</div>
 			</Reveal>

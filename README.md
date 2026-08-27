@@ -30,9 +30,10 @@ npm run deploy
 The site uses Firebase Authentication and Cloud Firestore. Before using the admin:
 
 1. In the Firebase Console for `ashleighdarnell`, create a Firestore database.
-2. Under Authentication → Sign-in method, enable Email/Password.
-3. Under Authentication → Users, create the administrator account. The website intentionally has no public registration screen.
-4. Deploy the included Firestore security rules:
+2. Under Authentication → Sign-in method, enable Email/Password and Google.
+3. Under Authentication → Users, create or sign in once with each administrator account and copy its UID.
+4. In Firestore, create an `admins` collection with one document per administrator. The document ID must exactly match that user’s Authentication UID; add a descriptive `email` field.
+5. Deploy the included Firestore security rules:
 
 ```bash
 npx firebase-tools login
@@ -40,6 +41,16 @@ npx firebase-tools deploy --only firestore:rules --project ashleighdarnell
 ```
 
 On the first authenticated admin visit, an empty Firestore database is seeded from the site's current local/default content. After that, Firestore is authoritative. Public visitors can read published content and create newsletter subscriptions; all admin writes require authentication.
+
+## Cloudflare Images setup
+
+The Content → Image archive screen uses Cloudflare Images for bulk uploads, URL imports, image sets, and site-wide replacements. Add these variables in the Cloudflare Pages project for both production and preview:
+
+- `CLOUDFLARE_IMAGES_API_TOKEN` — encrypted secret with Account → Cloudflare Images → Edit permission
+- `CLOUDFLARE_ACCOUNT_ID` — the Cloudflare account ID
+- `CLOUDFLARE_IMAGES_ACCOUNT_HASH` — the Images delivery hash
+
+For local development, copy `.env.example` to `.env` and fill in the same values. Images uploaded by this site receive an `ashleighdarnell/` custom ID and `site: ashleighdarnell` metadata, so images belonging to other projects in the same Cloudflare account do not appear in this archive.
 
 ## Structure
 

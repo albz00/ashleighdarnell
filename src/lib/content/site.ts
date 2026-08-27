@@ -40,6 +40,9 @@ export type BlogPost = {
 	category: string;
 	cover: string;
 	alt: string;
+	coverCaption?: string;
+	coverRotation?: string[];
+	coverRotationSeconds?: number;
 	publishedAt: string;
 	status: PostStatus;
 	featured: boolean;

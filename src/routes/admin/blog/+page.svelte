@@ -2,6 +2,7 @@
 	import type { BlogPost } from '$lib/content/site';
 	import { newId, posts, slugify } from '$lib/content/site';
 	import { deletePost, savePost } from '$lib/firebase/repository';
+	import ImageSourcePicker from '$lib/components/admin/ImageSourcePicker.svelte';
 
 	const blank = (): BlogPost => ({
 		id: newId('post'),
@@ -13,6 +14,9 @@
 		cover:
 			'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=85',
 		alt: '',
+		coverCaption: '',
+		coverRotation: [],
+		coverRotationSeconds: 8,
 		publishedAt: new Date().toISOString().slice(0, 10),
 		status: 'draft',
 		featured: false
@@ -32,8 +36,23 @@
 	);
 
 	function edit(post: BlogPost) {
-		editing = { ...post };
+		editing = {
+			...post,
+			coverCaption: post.coverCaption ?? '',
+			coverRotation: [...(post.coverRotation ?? [])],
+			coverRotationSeconds: post.coverRotationSeconds ?? 8
+		};
 		notice = '';
+	}
+
+	function addCoverRotation() {
+		if (!editing) return;
+		editing.coverRotation = [...(editing.coverRotation ?? []), ''];
+	}
+
+	function removeCoverRotation(index: number) {
+		if (!editing) return;
+		editing.coverRotation = (editing.coverRotation ?? []).filter((_, position) => position !== index);
 	}
 
 	async function save() {
@@ -49,7 +68,7 @@
 			$posts = exists
 				? $posts.map((post) => (post.id === editing?.id ? { ...editing } as BlogPost : post))
 				: [{ ...editing }, ...$posts];
-			notice = 'Story saved to Firebase.';
+			notice = 'Story saved to the server.';
 			editing = null;
 		} catch (error) {
 			notice = error instanceof Error ? error.message : 'Story could not be saved.';
@@ -61,7 +80,7 @@
 		try {
 			await deletePost(post.id);
 			$posts = $posts.filter((item) => item.id !== post.id);
-			notice = 'Story deleted from Firebase.';
+			notice = 'Story deleted from the server.';
 		} catch (error) {
 			notice = error instanceof Error ? error.message : 'Story could not be deleted.';
 		}
@@ -153,9 +172,66 @@
 					<span class="text-xs font-semibold">Story body</span>
 					<textarea bind:value={editing.body} rows="8" class="mt-2 w-full resize-y rounded-2xl border border-line bg-mist px-4 py-3 leading-relaxed outline-none focus:border-coral"></textarea>
 				</label>
+				<div class="block md:col-span-2">
+					<span class="mb-2 block text-xs font-semibold">Cover image source</span>
+					<div class="rounded-3xl bg-mist p-4">
+						<div class="grid gap-4 md:grid-cols-[8rem_1fr]">
+							<img
+								src={editing.cover}
+								alt={editing.alt}
+								class="aspect-square w-full rounded-2xl bg-line object-cover"
+							/>
+							<ImageSourcePicker
+								value={editing.cover}
+								onselect={(value) => {
+									if (editing) editing.cover = value;
+								}}
+							/>
+						</div>
+						<div class="mt-5 border-t border-line pt-5">
+							<div class="flex flex-wrap items-center justify-between gap-3">
+								<div>
+									<p class="text-xs font-semibold">Rotating cover images</p>
+									<p class="mt-1 text-[11px] text-muted">Cycle through additional images automatically.</p>
+								</div>
+								<div class="flex items-center gap-2">
+									<label class="text-[11px] text-muted" for="cover-rotation-seconds">Seconds</label>
+									<input
+										id="cover-rotation-seconds"
+										type="number"
+										min="2"
+										max="300"
+										bind:value={editing.coverRotationSeconds}
+										class="w-20 rounded-xl border border-line bg-paper px-3 py-2 text-xs"
+									/>
+									<button type="button" onclick={addCoverRotation} class="rounded-full bg-ink px-4 py-2 text-xs text-paper">
+										Add image
+									</button>
+								</div>
+							</div>
+							{#each editing.coverRotation ?? [] as source, index}
+								<div class="mt-4 grid gap-2 sm:grid-cols-[1fr_auto]">
+									<ImageSourcePicker
+										value={source}
+										onselect={(value) => {
+											if (editing?.coverRotation) editing.coverRotation[index] = value;
+										}}
+									/>
+									<button
+										type="button"
+										onclick={() => removeCoverRotation(index)}
+										class="self-start rounded-full px-4 py-2 text-xs text-coral"
+									>
+										Remove
+									</button>
+								</div>
+							{/each}
+						</div>
+					</div>
+				</div>
 				<label class="block md:col-span-2">
-					<span class="text-xs font-semibold">Cover image URL</span>
-					<input bind:value={editing.cover} class="mt-2 w-full rounded-2xl border border-line bg-mist px-4 py-3 outline-none focus:border-coral" />
+					<span class="text-xs font-semibold">Cover caption</span>
+					<input bind:value={editing.coverCaption} class="mt-2 w-full rounded-2xl border border-line bg-mist px-4 py-3 outline-none focus:border-coral" />
 				</label>
 				<label class="block">
 					<span class="text-xs font-semibold">Image description</span>

@@ -3,6 +3,7 @@
 	import Reveal from '$lib/components/Reveal.svelte';
 	import Wave from '$lib/components/Wave.svelte';
 	import { pageContent } from '$lib/content/page-content';
+	import { rotateMedia } from '$lib/actions/rotate-media';
 
 	const home = $derived($pageContent.home);
 </script>
@@ -16,12 +17,16 @@
 <section
 	class="hero-story backdrop-mountains relative overflow-hidden bg-paper"
 	style:--managed-bg={'url("' + home.background.src + '")'}
+	use:rotateMedia={{ media: home.background, background: true }}
 >
 	<div class="hero-backdrop" aria-hidden="true">
 		<Placeholder
 			label="portrait"
 			src={home.backdrops[0].src}
 			alt={home.backdrops[0].alt}
+			caption={home.backdrops[0].caption}
+			rotation={home.backdrops[0].rotation}
+			rotationSeconds={home.backdrops[0].rotationSeconds}
 			ratio="4/5"
 			tint="blush"
 			class="hero-backdrop-photo hero-backdrop-photo-a"
@@ -30,6 +35,9 @@
 			label="detail"
 			src={home.backdrops[1].src}
 			alt={home.backdrops[1].alt}
+			caption={home.backdrops[1].caption}
+			rotation={home.backdrops[1].rotation}
+			rotationSeconds={home.backdrops[1].rotationSeconds}
 			ratio="1/1"
 			tint="butter"
 			class="hero-backdrop-photo hero-backdrop-photo-b"
@@ -38,6 +46,9 @@
 			label="studio"
 			src={home.backdrops[2].src}
 			alt={home.backdrops[2].alt}
+			caption={home.backdrops[2].caption}
+			rotation={home.backdrops[2].rotation}
+			rotationSeconds={home.backdrops[2].rotationSeconds}
 			ratio="3/4"
 			tint="mint"
 			class="hero-backdrop-photo hero-backdrop-photo-c"
@@ -46,6 +57,9 @@
 			label="editorial"
 			src={home.backdrops[3].src}
 			alt={home.backdrops[3].alt}
+			caption={home.backdrops[3].caption}
+			rotation={home.backdrops[3].rotation}
+			rotationSeconds={home.backdrops[3].rotationSeconds}
 			ratio="4/5"
 			tint="lilac"
 			class="hero-backdrop-photo hero-backdrop-photo-d"
@@ -96,6 +110,8 @@
 						label="portrait story"
 						src={home.gallery[0].src}
 						alt={home.gallery[0].alt}
+						rotation={home.gallery[0].rotation}
+						rotationSeconds={home.gallery[0].rotationSeconds}
 						ratio="4/5"
 						tint="blush"
 						class="hero-card-media outline-frame"
@@ -107,6 +123,8 @@
 						label="brand story"
 						src={home.gallery[1].src}
 						alt={home.gallery[1].alt}
+						rotation={home.gallery[1].rotation}
+						rotationSeconds={home.gallery[1].rotationSeconds}
 						ratio="4/5"
 						tint="mint"
 						class="hero-card-media outline-frame"
@@ -118,6 +136,8 @@
 						label="social story"
 						src={home.gallery[2].src}
 						alt={home.gallery[2].alt}
+						rotation={home.gallery[2].rotation}
+						rotationSeconds={home.gallery[2].rotationSeconds}
 						ratio="4/5"
 						tint="butter"
 						class="hero-card-media outline-frame"
@@ -127,6 +147,11 @@
 			</div>
 		</Reveal>
 	</div>
+	{#if home.background.caption}
+		<p class="absolute bottom-4 right-5 z-20 rounded-full bg-ink/60 px-3 py-1.5 text-[10px] text-paper backdrop-blur-sm">
+			{home.background.caption}
+		</p>
+	{/if}
 </section>
 
 <!-- ============ 02 · WHAT I CREATE (blush) ============ -->
@@ -145,7 +170,7 @@
 					href={home.services[0].href}
 					class="card-lift group block rounded-[2.5rem] bg-violet p-6 text-paper"
 				>
-					<Placeholder label="photography cover" src={home.services[0].image.src} alt={home.services[0].image.alt} ratio="16/10" tint="blush" class="arch-soft outline-frame" />
+					<Placeholder label="photography cover" src={home.services[0].image.src} alt={home.services[0].image.alt} caption={home.services[0].image.caption} rotation={home.services[0].image.rotation} rotationSeconds={home.services[0].image.rotationSeconds} ratio="16/10" tint="blush" class="arch-soft outline-frame" />
 					<h3 class="font-display mt-6 text-2xl">{home.services[0].title}</h3>
 					<p class="mt-2 text-sm text-paper/75">
 						{home.services[0].text}
@@ -155,7 +180,7 @@
 
 			<Reveal delay={180}>
 				<a href={home.services[1].href} class="card-lift group block rounded-[2.5rem] bg-marigold p-6">
-					<Placeholder label="social media cover" src={home.services[1].image.src} alt={home.services[1].image.alt} ratio="16/10" tint="mint" class="arch-soft outline-frame" />
+					<Placeholder label="social media cover" src={home.services[1].image.src} alt={home.services[1].image.alt} caption={home.services[1].image.caption} rotation={home.services[1].image.rotation} rotationSeconds={home.services[1].image.rotationSeconds} ratio="16/10" tint="mint" class="arch-soft outline-frame" />
 					<h3 class="font-display mt-6 text-2xl">{home.services[1].title}</h3>
 					<p class="mt-2 text-sm text-ink/70">
 						{home.services[1].text}
@@ -173,7 +198,7 @@
 		class="mx-auto grid max-w-6xl items-center gap-14 px-5 pt-10 pb-20 md:grid-cols-[0.85fr_1.15fr] md:px-8 md:pt-14 md:pb-28"
 	>
 		<Reveal>
-			<Placeholder label="about photo" src={home.aboutImage.src} alt={home.aboutImage.alt} ratio="4/5" tint="butter" class="arch max-w-sm outline-frame" />
+			<Placeholder label="about photo" src={home.aboutImage.src} alt={home.aboutImage.alt} caption={home.aboutImage.caption} rotation={home.aboutImage.rotation} rotationSeconds={home.aboutImage.rotationSeconds} ratio="4/5" tint="butter" class="arch max-w-sm outline-frame" />
 		</Reveal>
 		<Reveal delay={120}>
 			<div>

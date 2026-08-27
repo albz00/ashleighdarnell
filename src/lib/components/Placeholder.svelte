@@ -1,8 +1,13 @@
 <script lang="ts">
+	import { rotateMedia } from '$lib/actions/rotate-media';
+
 	let {
 		label = 'image',
 		src,
 		alt,
+		caption,
+		rotation = [],
+		rotationSeconds = 8,
 		ratio = '3/4',
 		tint = 'mist',
 		class: className = ''
@@ -10,6 +15,9 @@
 		label?: string;
 		src?: string;
 		alt?: string;
+		caption?: string;
+		rotation?: string[];
+		rotationSeconds?: number;
 		ratio?: string;
 		tint?: 'mist' | 'blush' | 'butter' | 'mint' | 'lilac';
 		class?: string;
@@ -48,9 +56,17 @@
 		<img
 			src={src || images[index]}
 			alt={alt || label}
+			use:rotateMedia={{
+				media: { src: src || images[index], alt: alt || label, rotation, rotationSeconds }
+			}}
 			loading="lazy"
 			decoding="async"
 			class="media-zoom h-full w-full object-cover"
 		/>
+		{#if caption}
+			<p class="absolute inset-x-3 bottom-3 rounded-full bg-ink/65 px-3 py-1.5 text-center text-[10px] text-paper backdrop-blur-sm">
+				{caption}
+			</p>
+		{/if}
 	</div>
 </div>

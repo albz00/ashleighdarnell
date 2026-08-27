@@ -31,7 +31,7 @@
 		try {
 			await saveSiteSettings(preview, $effectSettings);
 			$selectedTheme = preview;
-			notice = 'Theme saved to Firebase and applied across the website.';
+			notice = 'Theme saved to the server and applied across the website.';
 		} catch (error) {
 			notice = error instanceof Error ? error.message : 'Theme could not be saved.';
 		}
@@ -46,7 +46,7 @@
 		try {
 			await saveSiteSettings($selectedTheme, effectDraft);
 			$effectSettings = { ...effectDraft };
-			notice = 'Seasonal effects saved to Firebase and applied to the website.';
+			notice = 'Seasonal effects saved to the server and applied to the website.';
 		} catch (error) {
 			notice = error instanceof Error ? error.message : 'Effects could not be saved.';
 		}

@@ -5,10 +5,11 @@ import {
 	getAuth,
 	onAuthStateChanged,
 	setPersistence,
+	signOut,
 	type Auth,
 	type User
 } from 'firebase/auth';
-import { getFirestore, type Firestore } from 'firebase/firestore';
+import { doc, getDoc, getFirestore, type Firestore } from 'firebase/firestore';
 import { writable } from 'svelte/store';
 
 const firebaseConfig = {
@@ -41,6 +42,12 @@ export const firebaseApp: FirebaseApp | null = browser
 export const auth: Auth | null = firebaseApp ? getAuth(firebaseApp) : null;
 export const db: Firestore | null = firebaseApp ? getFirestore(firebaseApp) : null;
 
+export async function hasAdminAccess(user: User) {
+	if (!db) return false;
+	const administrator = await getDoc(doc(db, 'admins', user.uid));
+	return administrator.exists();
+}
+
 if (auth) {
 	setPersistence(auth, browserLocalPersistence).catch((error: unknown) => {
 		authState.update((state) => ({
@@ -51,7 +58,30 @@ if (auth) {
 
 	onAuthStateChanged(
 		auth,
-		(user) => authState.set({ user, loading: false, error: '' }),
+		async (user) => {
+			if (!user) {
+				authState.set({ user: null, loading: false, error: '' });
+				return;
+			}
+			try {
+				if (await hasAdminAccess(user)) {
+					authState.set({ user, loading: false, error: '' });
+				} else {
+					authState.set({
+						user: null,
+						loading: false,
+						error: 'This account does not have administrator access.'
+					});
+					await signOut(auth);
+				}
+			} catch (error: unknown) {
+				authState.set({
+					user: null,
+					loading: false,
+					error: error instanceof Error ? error.message : 'Administrator access could not be verified.'
+				});
+			}
+		},
 		(error) => authState.set({ user: null, loading: false, error: error.message })
 	);
 }

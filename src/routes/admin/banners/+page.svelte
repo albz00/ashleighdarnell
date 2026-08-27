@@ -32,7 +32,7 @@
 			await saveBanners(next);
 			$banners = next;
 			editing = null;
-			notice = 'Banner saved to Firebase.';
+			notice = 'Banner saved to the server.';
 		} catch (error) {
 			notice = error instanceof Error ? error.message : 'Banner could not be saved.';
 		}
@@ -47,7 +47,7 @@
 			await saveBanners(next);
 			$banners = next;
 			notice = next.find((banner) => banner.active)
-				? 'The selected banner is now live from Firebase.'
+				? 'The selected banner is now live.'
 				: 'All banners are now hidden.';
 		} catch (error) {
 			notice = error instanceof Error ? error.message : 'Banner status could not be saved.';
@@ -59,7 +59,7 @@
 		try {
 			await deleteBanner(id);
 			$banners = $banners.filter((item) => item.id !== id);
-			notice = 'Banner deleted from Firebase.';
+			notice = 'Banner deleted from the server.';
 		} catch (error) {
 			notice = error instanceof Error ? error.message : 'Banner could not be deleted.';
 		}

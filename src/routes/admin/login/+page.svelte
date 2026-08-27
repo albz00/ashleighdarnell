@@ -1,42 +1,78 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { signInWithEmailAndPassword } from 'firebase/auth';
-	import { auth, authState } from '$lib/firebase/client';
+	import {
+		GoogleAuthProvider,
+		signInWithEmailAndPassword,
+		signInWithPopup,
+		signOut,
+		type User
+	} from 'firebase/auth';
+	import { auth, authState, hasAdminAccess } from '$lib/firebase/client';
 
 	let email = $state('');
 	let password = $state('');
-	let loading = $state(false);
+	let loading = $state<'email' | 'google' | null>(null);
 	let errorMessage = $state('');
 
 	$effect(() => {
 		if ($authState.user) goto('/admin');
 	});
 
+	async function authorize(user: User) {
+		if (await hasAdminAccess(user)) return;
+		if (auth) await signOut(auth);
+		throw new Error('This Google account does not have administrator access.');
+	}
+
+	function loginError(error: unknown) {
+		const code = error && typeof error === 'object' && 'code' in error ? String(error.code) : '';
+		if (error instanceof Error && error.message.includes('administrator access')) return error.message;
+		if (
+			code === 'auth/invalid-credential' ||
+			code === 'auth/user-not-found' ||
+			code === 'auth/wrong-password'
+		)
+			return 'The email or password is incorrect.';
+		if (code === 'auth/too-many-requests') return 'Too many attempts. Please wait and try again.';
+		if (code === 'auth/network-request-failed') return 'Could not reach the server. Check your connection.';
+		if (code === 'auth/popup-closed-by-user') return 'Google sign-in was closed before completion.';
+		if (code === 'auth/popup-blocked') return 'Allow pop-ups for this site to use Google sign-in.';
+		return 'Sign-in failed. Please try again or contact the site administrator.';
+	}
+
 	async function login() {
 		if (!auth) {
-			errorMessage = 'Firebase Authentication is unavailable.';
+			errorMessage = 'Sign-in is temporarily unavailable.';
 			return;
 		}
-		loading = true;
+		loading = 'email';
 		errorMessage = '';
 		try {
-			await signInWithEmailAndPassword(auth, email.trim(), password);
+			const credential = await signInWithEmailAndPassword(auth, email.trim(), password);
+			await authorize(credential.user);
 			await goto('/admin');
 		} catch (error: unknown) {
-			const code =
-				error && typeof error === 'object' && 'code' in error ? String(error.code) : '';
-			errorMessage =
-				code === 'auth/invalid-credential' ||
-				code === 'auth/user-not-found' ||
-				code === 'auth/wrong-password'
-					? 'The email or password is incorrect.'
-					: code === 'auth/too-many-requests'
-						? 'Too many attempts. Please wait and try again.'
-						: code === 'auth/network-request-failed'
-							? 'Could not reach Firebase. Check your connection.'
-							: 'Sign-in failed. Confirm Email/Password authentication is enabled in Firebase.';
+			errorMessage = loginError(error);
 		} finally {
-			loading = false;
+			loading = null;
+		}
+	}
+
+	async function loginWithGoogle() {
+		if (!auth) {
+			errorMessage = 'Sign-in is temporarily unavailable.';
+			return;
+		}
+		loading = 'google';
+		errorMessage = '';
+		try {
+			const credential = await signInWithPopup(auth, new GoogleAuthProvider());
+			await authorize(credential.user);
+			await goto('/admin');
+		} catch (error: unknown) {
+			errorMessage = loginError(error);
+		} finally {
+			loading = null;
 		}
 	}
 </script>
@@ -61,13 +97,31 @@
 			<a href="/" class="font-display text-2xl">Ashleigh <span class="font-cursive text-4xl text-coral">Darnell</span></a>
 			<h1 class="font-display mt-12 text-5xl">Sign in</h1>
 			<p class="mt-4 text-sm leading-relaxed text-muted">
-				Use the administrator account created in Firebase Authentication.
+				Sign in with an approved administrator account to open the website studio.
 			</p>
 
-			<form class="mt-9 space-y-5" onsubmit={(event) => { event.preventDefault(); login(); }}>
-				{#if errorMessage}
-					<p class="rounded-2xl bg-blush px-4 py-3 text-sm text-coral" role="alert">{errorMessage}</p>
+			<div class="mt-9">
+				{#if errorMessage || $authState.error}
+					<p class="mb-5 rounded-2xl bg-blush px-4 py-3 text-sm text-coral" role="alert">
+						{errorMessage || $authState.error}
+					</p>
 				{/if}
+				<button
+					type="button"
+					onclick={loginWithGoogle}
+					disabled={loading !== null}
+					class="w-full rounded-full border border-line bg-paper px-6 py-4 text-sm font-semibold transition-colors hover:border-ink hover:bg-mist disabled:opacity-60"
+				>
+					{loading === 'google' ? 'Connecting to Google…' : 'Continue with Google'}
+				</button>
+				<div class="my-6 flex items-center gap-4">
+					<div class="h-px flex-1 bg-line"></div>
+					<span class="text-[10px] uppercase tracking-[0.18em] text-muted">or use email</span>
+					<div class="h-px flex-1 bg-line"></div>
+				</div>
+			</div>
+
+			<form class="space-y-5" onsubmit={(event) => { event.preventDefault(); login(); }}>
 				<label class="block">
 					<span class="text-xs font-semibold">Email address</span>
 					<input
@@ -86,10 +140,10 @@
 				</label>
 				<button
 					type="submit"
-					disabled={loading}
+					disabled={loading !== null}
 					class="btn-fun w-full rounded-full bg-coral px-6 py-4 text-sm font-semibold text-paper disabled:opacity-60"
 				>
-					{loading ? 'Opening studio…' : 'Login to studio'}
+					{loading === 'email' ? 'Opening studio…' : 'Login to studio'}
 				</button>
 			</form>
 			<a href="/" class="mt-8 inline-block text-sm text-muted hover:text-ink">← Back to website</a>

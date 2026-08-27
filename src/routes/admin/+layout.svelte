@@ -35,7 +35,7 @@
 	<div class="grid min-h-screen place-items-center bg-mist">
 		<div class="text-center">
 			<div class="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-line border-t-coral"></div>
-			<p class="mt-4 text-sm text-muted">Checking your Firebase session…</p>
+			<p class="mt-4 text-sm text-muted">Checking your session…</p>
 		</div>
 	</div>
 {:else if $authState.user}
@@ -97,7 +97,7 @@
 			</header>
 			{#if $firebaseConnection.error}
 				<p class="mx-5 mt-5 rounded-2xl bg-blush px-5 py-3 text-sm text-coral md:mx-8">
-					Firebase sync issue: {$firebaseConnection.error}
+					Sync error: {$firebaseConnection.error}
 				</p>
 			{/if}
 			<main class="p-5 md:p-8 lg:p-10">{@render children()}</main>

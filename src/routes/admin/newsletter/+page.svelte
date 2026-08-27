@@ -44,7 +44,7 @@
 			$subscribers = [subscriber, ...$subscribers];
 			name = '';
 			email = '';
-			notice = 'Reader saved to Firebase.';
+			notice = 'Reader saved to the server.';
 		} catch (error) {
 			notice = error instanceof Error ? error.message : 'Reader could not be saved.';
 		}
@@ -73,7 +73,7 @@
 			composerOpen = false;
 			notice = send
 				? `Campaign status saved — no email was actually sent to ${activeCount} readers.`
-				: 'Campaign draft saved to Firebase.';
+				: 'Campaign draft saved to the server.';
 		} catch (error) {
 			notice = error instanceof Error ? error.message : 'Campaign could not be saved.';
 		}
@@ -89,7 +89,7 @@
 		try {
 			await saveSubscriber(updated);
 			$subscribers = $subscribers.map((item) => (item.id === id ? updated : item));
-			notice = 'Reader status saved to Firebase.';
+			notice = 'Reader status saved to the server.';
 		} catch (error) {
 			notice = error instanceof Error ? error.message : 'Reader status could not be saved.';
 		}
@@ -100,7 +100,7 @@
 		try {
 			await deleteSubscriber(id);
 			$subscribers = $subscribers.filter((item) => item.id !== id);
-			notice = 'Reader removed from Firebase.';
+			notice = 'Reader removed from the server.';
 		} catch (error) {
 			notice = error instanceof Error ? error.message : 'Reader could not be removed.';
 		}
@@ -113,7 +113,7 @@
 	<div class="flex flex-wrap items-end justify-between gap-4">
 		<div>
 			<h1 class="font-display text-5xl">Newsletter</h1>
-			<p class="mt-3 text-muted">{activeCount} active readers · synced with Firebase</p>
+			<p class="mt-3 text-muted">{activeCount} active readers · synced with the server</p>
 		</div>
 		<button onclick={() => compose()} class="btn-fun rounded-full bg-teal px-6 py-3 text-sm font-semibold text-paper">Compose email</button>
 	</div>

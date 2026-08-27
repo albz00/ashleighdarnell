@@ -89,5 +89,5 @@
 		</section>
 	</div>
 
-	<p class="mt-6 text-center text-xs text-muted">Connected to Firebase · Saved changes sync to the public site</p>
+	<p class="mt-6 text-center text-xs text-muted">Connected to the server · Saved changes sync to the public site</p>
 </div>

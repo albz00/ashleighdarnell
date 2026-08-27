@@ -3,6 +3,7 @@
 	import Reveal from '$lib/components/Reveal.svelte';
 	import Wave from '$lib/components/Wave.svelte';
 	import { pageContent } from '$lib/content/page-content';
+	import { rotateMedia } from '$lib/actions/rotate-media';
 
 	const factStyles = [
 		{
@@ -33,13 +34,17 @@
 	<title>{about.seoTitle}</title>
 </svelte:head>
 
-<section class="backdrop-forest bg-paper" style:--managed-bg={'url("' + about.background.src + '")'}>
+<section
+	class="backdrop-forest relative bg-paper"
+	style:--managed-bg={'url("' + about.background.src + '")'}
+	use:rotateMedia={{ media: about.background, background: true }}
+>
 	<div
 		class="mx-auto grid max-w-6xl items-center gap-16 px-5 pt-20 pb-24 md:grid-cols-[0.9fr_1.1fr] md:px-8 md:pt-28 md:pb-32"
 	>
 		<Reveal>
 			<div class="page-polaroid -rotate-2">
-				<Placeholder label="portrait" src={about.portrait.src} alt={about.portrait.alt} ratio="4/5" tint="lilac" class="outline-frame" />
+				<Placeholder label="portrait" src={about.portrait.src} alt={about.portrait.alt} rotation={about.portrait.rotation} rotationSeconds={about.portrait.rotationSeconds} ratio="4/5" tint="lilac" class="outline-frame" />
 				<p class="page-polaroid-caption">{about.portrait.caption}</p>
 			</div>
 		</Reveal>
@@ -56,6 +61,11 @@
 			</div>
 		</Reveal>
 	</div>
+	{#if about.background.caption}
+		<p class="absolute bottom-4 right-5 rounded-full bg-ink/60 px-3 py-1.5 text-[10px] text-paper backdrop-blur-sm">
+			{about.background.caption}
+		</p>
+	{/if}
 </section>
 
 <Wave fill="mist" size="lg" class="bg-paper" />

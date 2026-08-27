@@ -5,6 +5,8 @@ export type MediaContent = {
 	src: string;
 	alt: string;
 	caption?: string;
+	rotation?: string[];
+	rotationSeconds?: number;
 };
 
 export type NavItem = { label: string; href: string };

@@ -6,7 +6,13 @@ declare global {
 		// interface Locals {}
 		// interface PageData {}
 		// interface PageState {}
-		// interface Platform {}
+		interface Platform {
+			env?: {
+				CLOUDFLARE_IMAGES_API_TOKEN?: string;
+				CLOUDFLARE_ACCOUNT_ID?: string;
+				CLOUDFLARE_IMAGES_ACCOUNT_HASH?: string;
+			};
+		}
 	}
 }
 

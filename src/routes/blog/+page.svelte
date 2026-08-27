@@ -43,6 +43,8 @@
 				<Photo
 					src={featured.cover}
 					alt={featured.alt}
+					rotation={featured.coverRotation}
+					rotationSeconds={featured.coverRotationSeconds}
 					ratio="16/11"
 					loading="eager"
 					class="h-full min-h-80 rounded-none"
@@ -68,7 +70,8 @@
 			{#each published.filter((post) => post.id !== featured?.id) as post, index (post.id)}
 				<Reveal delay={(index % 3) * 80}>
 					<a href="/blog/{post.slug}" class="card-lift group block h-full">
-						<Photo src={post.cover} alt={post.alt} ratio="4/3" class="rounded-[2rem]" />
+						<Photo src={post.cover} alt={post.alt} rotation={post.coverRotation} rotationSeconds={post.coverRotationSeconds} ratio="4/3" class="rounded-[2rem]" />
+						{#if post.coverCaption}<p class="mt-2 text-xs text-muted">{post.coverCaption}</p>{/if}
 						<p class="mt-6 text-[11px] font-semibold uppercase tracking-[0.2em] text-coral">
 							{post.category} · {new Date(`${post.publishedAt}T12:00:00`).toLocaleDateString('en-US', {
 								month: 'short',

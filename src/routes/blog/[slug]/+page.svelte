@@ -39,7 +39,8 @@
 		</header>
 
 		<div class="mx-auto max-w-6xl px-5 md:px-8">
-			<Photo src={post.cover} alt={post.alt} ratio="16/8" loading="eager" class="rounded-[2.5rem]" />
+			<Photo src={post.cover} alt={post.alt} rotation={post.coverRotation} rotationSeconds={post.coverRotationSeconds} ratio="16/8" loading="eager" class="rounded-[2.5rem]" />
+			{#if post.coverCaption}<p class="mt-3 text-center text-sm text-muted">{post.coverCaption}</p>{/if}
 		</div>
 
 		<div class="mx-auto max-w-2xl px-5 py-14 md:px-8 md:py-20">
@@ -55,7 +56,7 @@
 			<div class="mt-10 grid gap-8 md:grid-cols-2">
 				{#each related as item (item.id)}
 					<a href="/blog/{item.slug}" class="group grid grid-cols-[8rem_1fr] items-center gap-5">
-						<Photo src={item.cover} alt={item.alt} ratio="1/1" class="rounded-3xl" />
+						<Photo src={item.cover} alt={item.alt} rotation={item.coverRotation} rotationSeconds={item.coverRotationSeconds} ratio="1/1" class="rounded-3xl" />
 						<div>
 							<p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-coral">{item.category}</p>
 							<h3 class="font-display mt-2 text-2xl leading-tight">{item.title}</h3>

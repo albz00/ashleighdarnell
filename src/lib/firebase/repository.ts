@@ -48,7 +48,10 @@ let privateUnsubscribes: Array<() => void> = [];
 let seededUser = '';
 
 function reportError(error: unknown) {
-	const message = error instanceof Error ? error.message : 'Firebase could not complete the request.';
+	const message =
+		error instanceof Error
+			? error.message.replace(/Firebase(?:Error)?:?\s*/gi, '').trim()
+			: 'The server could not complete the request.';
 	firebaseConnection.update((state) => ({ ...state, syncing: false, error: message }));
 }
 
