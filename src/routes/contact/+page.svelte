@@ -1,89 +1,70 @@
 <script lang="ts">
-	import Icon from '$lib/components/Icon.svelte';
 	import Reveal from '$lib/components/Reveal.svelte';
-	import SectionLabel from '$lib/components/SectionLabel.svelte';
+	import { pageContent } from '$lib/content/page-content';
+
+	const contact = $derived($pageContent.contact);
 </script>
 
 <svelte:head>
-	<title>Contact - Ashleigh Darnell</title>
+	<title>{contact.seoTitle}</title>
 </svelte:head>
 
-<section class="relative overflow-x-clip">
+<section class="bg-paper">
 	<div
-		class="animate-drift pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-violet/15 blur-3xl"
-	></div>
-	<div
-		class="animate-drift-slow pointer-events-none absolute bottom-0 -left-24 h-80 w-80 rounded-full bg-coral/15 blur-3xl"
-	></div>
-	<div
-		class="relative mx-auto grid max-w-6xl gap-16 px-5 pt-16 pb-24 md:grid-cols-[1fr_1.2fr] md:px-8 md:pt-24"
+		class="mx-auto grid max-w-6xl gap-16 px-5 pt-20 pb-24 md:grid-cols-[0.9fr_1.1fr] md:px-8 md:pt-28 md:pb-32"
 	>
 		<Reveal>
 			<div>
-				<SectionLabel text="Contact" accent="violet" />
-				<h1 class="font-display mt-6 text-4xl leading-tight tracking-tight md:text-6xl">
-					Lorem ipsum <span class="font-cursive text-[1.4em] leading-none text-coral">dolor sit</span> amet
+				<h1 class="page-display font-display">
+					{contact.titleBefore} <span class="font-cursive text-[1.4em] leading-none text-coral">{contact.titleAccent}</span> {contact.titleAfter}
 				</h1>
 				<p class="mt-6 max-w-sm leading-relaxed text-muted">
-					Consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna
-					aliqua.
+					{contact.intro}
 				</p>
 
-				<div class="mt-10 space-y-4 text-sm">
-					<p class="flex items-center gap-3 text-muted">
-						<span class="inline-flex animate-spin-slow text-violet">
-							<Icon name="spark" size={16} />
-						</span>
-						lorem@ipsum.dolor
-					</p>
-					<p class="flex items-center gap-3 text-muted">
-						<span class="inline-flex animate-float-spin text-marigold">
-							<Icon name="spark" size={16} class="animate-spin-wobble" />
-						</span>
-						@loremipsum · @doloramet
-					</p>
+				<div class="mt-10 space-y-3 border-t border-line pt-6 text-sm text-muted">
+					<p><a href="mailto:{contact.email}">{contact.email}</a></p>
+					<p>{contact.locations}</p>
 				</div>
 			</div>
 		</Reveal>
 
 		<Reveal delay={120}>
-			<form class="space-y-6" onsubmit={(e) => e.preventDefault()}>
+			<form class="space-y-6 rounded-[2.5rem] bg-mist p-6 md:p-8" onsubmit={(e) => e.preventDefault()}>
 				<div class="grid gap-6 sm:grid-cols-2">
 					<label class="block">
-						<span class="text-[11px] uppercase tracking-[0.2em] text-muted">Name</span>
+						<span class="text-[11px] uppercase tracking-[0.2em] text-muted">{contact.nameLabel}</span>
 						<input
 							type="text"
 							class="mt-2 w-full rounded-2xl border border-line bg-mist/60 px-4 py-3 outline-none transition-all duration-200 focus:border-coral focus:bg-paper focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--color-coral)_18%,transparent)]"
-							placeholder="Lorem ipsum"
+							placeholder={contact.namePlaceholder}
 						/>
 					</label>
 					<label class="block">
-						<span class="text-[11px] uppercase tracking-[0.2em] text-muted">Email</span>
+						<span class="text-[11px] uppercase tracking-[0.2em] text-muted">{contact.emailLabel}</span>
 						<input
 							type="email"
 							class="mt-2 w-full rounded-2xl border border-line bg-mist/60 px-4 py-3 outline-none transition-all duration-200 focus:border-coral focus:bg-paper focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--color-coral)_18%,transparent)]"
-							placeholder="dolor@sit.amet"
+							placeholder={contact.emailPlaceholder}
 						/>
 					</label>
 				</div>
 
 				<label class="block">
-					<span class="text-[11px] uppercase tracking-[0.2em] text-muted">I'm interested in</span>
+					<span class="text-[11px] uppercase tracking-[0.2em] text-muted">{contact.interestLabel}</span>
 					<select
 						class="mt-2 w-full rounded-2xl border border-line bg-mist/60 px-4 py-3 outline-none transition-all duration-200 focus:border-coral focus:bg-paper focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--color-coral)_18%,transparent)]"
 					>
-						<option>Photography</option>
-						<option>Social Media</option>
-						<option>Something else</option>
+						{#each contact.interestOptions as option}<option>{option}</option>{/each}
 					</select>
 				</label>
 
 				<label class="block">
-					<span class="text-[11px] uppercase tracking-[0.2em] text-muted">Message</span>
+					<span class="text-[11px] uppercase tracking-[0.2em] text-muted">{contact.messageLabel}</span>
 					<textarea
 						rows="5"
 						class="mt-2 w-full resize-none rounded-2xl border border-line bg-mist/60 px-4 py-3 outline-none transition-all duration-200 focus:border-coral focus:bg-paper focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--color-coral)_18%,transparent)]"
-						placeholder="Consectetur adipiscing elit, sed do eiusmod tempor incididunt..."
+						placeholder={contact.messagePlaceholder}
 					></textarea>
 				</label>
 
@@ -91,9 +72,11 @@
 					type="submit"
 					class="btn-fun inline-flex items-center gap-2 rounded-full border border-violet bg-violet px-9 py-4 text-[12px] uppercase tracking-[0.2em] text-paper hover:border-ink hover:bg-ink"
 				>
-					Send <Icon name="arrow" size={14} />
+					{contact.sendButton}
 				</button>
-				<p class="text-xs text-muted">Forma non conecta ad backend adhuc</p>
+				<p class="text-xs text-muted">
+					{contact.formNotice}
+				</p>
 			</form>
 		</Reveal>
 	</div>

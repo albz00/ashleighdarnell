@@ -25,6 +25,22 @@ If you configure build settings in the dashboard instead:
 npm run deploy
 ```
 
+## Firebase setup
+
+The site uses Firebase Authentication and Cloud Firestore. Before using the admin:
+
+1. In the Firebase Console for `ashleighdarnell`, create a Firestore database.
+2. Under Authentication → Sign-in method, enable Email/Password.
+3. Under Authentication → Users, create the administrator account. The website intentionally has no public registration screen.
+4. Deploy the included Firestore security rules:
+
+```bash
+npx firebase-tools login
+npx firebase-tools deploy --only firestore:rules --project ashleighdarnell
+```
+
+On the first authenticated admin visit, an empty Firestore database is seeded from the site's current local/default content. After that, Firestore is authoritative. Public visitors can read published content and create newsletter subscriptions; all admin writes require authentication.
+
 ## Structure
 
 | Route | Purpose |

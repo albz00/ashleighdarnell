@@ -1,212 +1,206 @@
 <script lang="ts">
-	import Icon from '$lib/components/Icon.svelte';
-	import Floater from '$lib/components/Floater.svelte';
 	import Placeholder from '$lib/components/Placeholder.svelte';
 	import Reveal from '$lib/components/Reveal.svelte';
-	import SectionLabel from '$lib/components/SectionLabel.svelte';
-	import Squiggle from '$lib/components/Squiggle.svelte';
 	import Wave from '$lib/components/Wave.svelte';
+	import { pageContent } from '$lib/content/page-content';
+
+	const home = $derived($pageContent.home);
 </script>
 
 <svelte:head>
-	<title>Ashleigh Darnell</title>
-	<meta name="description" content="Lorem ipsum dolor sit amet, consectetur adipiscing elit." />
+	<title>{home.seoTitle}</title>
+	<meta name="description" content={home.seoDescription} />
 </svelte:head>
 
-<!-- ============ HERO + CREDIBILITY REGION (shared spotlights) ============ -->
-<div class="relative overflow-x-clip">
+<!-- ============ 01 · HERO ============ -->
+<section
+	class="hero-story backdrop-mountains relative overflow-hidden bg-paper"
+	style:--managed-bg={'url("' + home.background.src + '")'}
+>
+	<div class="hero-backdrop" aria-hidden="true">
+		<Placeholder
+			label="portrait"
+			src={home.backdrops[0].src}
+			alt={home.backdrops[0].alt}
+			ratio="4/5"
+			tint="blush"
+			class="hero-backdrop-photo hero-backdrop-photo-a"
+		/>
+		<Placeholder
+			label="detail"
+			src={home.backdrops[1].src}
+			alt={home.backdrops[1].alt}
+			ratio="1/1"
+			tint="butter"
+			class="hero-backdrop-photo hero-backdrop-photo-b"
+		/>
+		<Placeholder
+			label="studio"
+			src={home.backdrops[2].src}
+			alt={home.backdrops[2].alt}
+			ratio="3/4"
+			tint="mint"
+			class="hero-backdrop-photo hero-backdrop-photo-c"
+		/>
+		<Placeholder
+			label="editorial"
+			src={home.backdrops[3].src}
+			alt={home.backdrops[3].alt}
+			ratio="4/5"
+			tint="lilac"
+			class="hero-backdrop-photo hero-backdrop-photo-d"
+		/>
+	</div>
 	<div
-		class="animate-drift pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-coral/15 blur-3xl"
-	></div>
-	<div
-		class="animate-drift-slow pointer-events-none absolute top-1/4 -right-32 h-[28rem] w-[28rem] rounded-full bg-violet/15 blur-3xl"
-	></div>
-	<div
-		class="animate-drift pointer-events-none absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-marigold/20 blur-3xl"
-		style="animation-delay: -6s"
-	></div>
-
-	<section>
-		<div
-			class="relative mx-auto grid max-w-6xl items-center gap-12 px-5 pt-16 pb-20 md:grid-cols-[1.2fr_1fr] md:px-8 md:pt-24"
-		>
-			<div>
-				<Reveal>
-					<SectionLabel text="Lorem ipsum dolor" accent="coral" />
-				</Reveal>
-				<Reveal delay={80}>
-					<h1 class="font-display mt-6 text-5xl leading-[1.05] tracking-tight md:text-7xl">
-						Lorem ipsum<br />
-						<span class="font-cursive text-[1.4em] leading-none text-coral">dolor sit</span> amet
-					</h1>
-				</Reveal>
-				<Reveal delay={160}>
-					<p class="mt-6 max-w-md text-base leading-relaxed text-muted">
-						[Short supporting sentence: who Ashleigh is and what she does, warm and playful but
-						professional.] Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-						tempor incididunt ut labore.
-					</p>
-				</Reveal>
-				<Reveal delay={240}>
-					<div class="mt-10 flex flex-wrap gap-4">
-						<a
-							href="/photography"
-							class="btn-fun inline-flex items-center gap-2 rounded-full border border-coral bg-coral px-7 py-3.5 text-[12px] uppercase tracking-[0.2em] text-paper hover:border-ink hover:bg-ink"
-						>
-							Photography <Icon name="arrow" size={14} />
-						</a>
-						<a
-							href="/social"
-							class="btn-fun inline-flex items-center gap-2 rounded-full border border-teal px-7 py-3.5 text-[12px] uppercase tracking-[0.2em] text-teal hover:bg-teal hover:text-paper"
-						>
-							Social Media <Icon name="arrow" size={14} />
-						</a>
-					</div>
-				</Reveal>
-			</div>
-
-			<Reveal delay={120} class="relative">
-				<Placeholder label="hero portrait" ratio="4/5" tint="blush" />
-				<Floater tint="butter" size="lg" class="-bottom-6 -left-6 hidden md:flex" />
-				<Floater
-					tint="lilac"
-					size="sm"
-					motion="float"
-					spin="spin-wobble"
-					class="-top-4 -right-3 hidden md:flex"
-					style="animation-delay: -1.5s"
-				/>
+		class="relative z-10 mx-auto grid max-w-6xl items-center gap-16 px-5 pt-20 pb-24 md:grid-cols-[1.05fr_0.95fr] md:px-8 md:pt-28 md:pb-32"
+	>
+		<div>
+			<Reveal delay={80}>
+				<h1 class="home-display font-display">
+					{home.heroLines[0]}<br />
+					<span class="home-display-accent">{home.heroLines[1]}</span><br />
+					<span class="text-teal">{home.heroLines[2]}</span>
+				</h1>
+			</Reveal>
+			<Reveal delay={160}>
+				<p class="mt-8 max-w-md text-base font-medium leading-relaxed text-ink/75">
+					{home.intro}
+				</p>
+			</Reveal>
+			<Reveal delay={240}>
+				<div class="mt-10 flex flex-wrap gap-4">
+					<a
+						href="/photography"
+						class="btn-fun outline-button inline-flex items-center gap-2 rounded-full bg-coral px-7 py-3.5 text-[12px] uppercase tracking-[0.2em] text-paper hover:bg-ink"
+					>
+						{home.primaryCta}
+					</a>
+					<a
+						href="/social"
+						class="btn-fun outline-button inline-flex items-center gap-2 rounded-full bg-mint px-7 py-3.5 text-[12px] uppercase tracking-[0.2em] text-teal hover:bg-teal hover:text-paper"
+					>
+						{home.secondaryCta}
+					</a>
+				</div>
 			</Reveal>
 		</div>
-	</section>
 
-	<Wave fill="butter" />
-	<section class="bg-butter">
-		<div
-			class="relative mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-10 gap-y-3 px-5 py-6 text-[11px] uppercase tracking-[0.25em] text-ink/70 md:justify-between md:px-8"
-		>
-			<span>Consectetur adipiscing</span>
-			<span class="inline-flex animate-spin-slow">
-				<Icon name="spark" size={10} class="text-coral" />
-			</span>
-			<span>Sed do eiusmod</span>
-			<span
-				class="inline-flex animate-spin-slow"
-				style="animation-direction: reverse; animation-duration: 16s"
+		<Reveal delay={120} class="mx-2 md:mx-0">
+			<div
+				class="hero-gallery"
+				role="img"
+				aria-label="A rotating selection of creative work"
 			>
-				<Icon name="spark" size={10} class="text-teal" />
-			</span>
-			<span>Ut labore et dolore</span>
-			<span class="hidden animate-spin-wobble md:inline-flex">
-				<Icon name="spark" size={10} class="text-violet" />
-			</span>
-			<span class="hidden md:block">Magna aliqua enim</span>
-		</div>
-	</section>
-	<Wave fill="butter" flip />
-</div>
-
-<section class="mx-auto max-w-6xl px-5 py-20 md:px-8 md:py-28">
-	<Reveal>
-		<SectionLabel text="Two sides of the work" accent="violet" />
-		<h2 class="font-display mt-4 max-w-xl text-3xl leading-tight md:text-4xl">
-			Quis nostrud exercitation ullamco laboris nisi ut aliquip
-		</h2>
-	</Reveal>
-
-	<div class="mt-12 grid gap-6 md:grid-cols-2">
-		<Reveal delay={80}>
-			<a
-				href="/photography"
-				class="card-lift group block rounded-3xl border border-line p-6 hover:border-coral/50 hover:bg-blush"
-			>
-				<span class="inline-flex animate-spin-slower text-coral">
-					<Icon name="spark" size={22} />
-				</span>
-				<Placeholder label="photography cover" ratio="16/10" tint="blush" class="mt-6" />
-				<h3 class="font-display mt-6 text-2xl">Photography</h3>
-				<p class="mt-2 text-sm text-muted">
-					Duis aute irure dolor in reprehenderit in voluptate velit esse.
-				</p>
-			</a>
-		</Reveal>
-
-		<Reveal delay={180}>
-			<a
-				href="/social"
-				class="card-lift group block rounded-3xl border border-line p-6 hover:border-teal/50 hover:bg-mint"
-			>
-				<span class="inline-flex animate-spin-slower text-teal" style="animation-direction: reverse">
-					<Icon name="spark" size={22} />
-				</span>
-				<Placeholder label="social media cover" ratio="16/10" tint="mint" class="mt-6" />
-				<h3 class="font-display mt-6 text-2xl">Social Media</h3>
-				<p class="mt-2 text-sm text-muted">
-					Excepteur sint occaecat cupidatat non proident sunt in culpa.
-				</p>
-			</a>
+				<div class="hero-photo-card hero-photo-card-a">
+					<Placeholder
+						label="portrait story"
+						src={home.gallery[0].src}
+						alt={home.gallery[0].alt}
+						ratio="4/5"
+						tint="blush"
+						class="hero-card-media outline-frame"
+					/>
+					<p class="hero-polaroid-caption">{home.gallery[0].caption}</p>
+				</div>
+				<div class="hero-photo-card hero-photo-card-b">
+					<Placeholder
+						label="brand story"
+						src={home.gallery[1].src}
+						alt={home.gallery[1].alt}
+						ratio="4/5"
+						tint="mint"
+						class="hero-card-media outline-frame"
+					/>
+					<p class="hero-polaroid-caption">{home.gallery[1].caption}</p>
+				</div>
+				<div class="hero-photo-card hero-photo-card-c">
+					<Placeholder
+						label="social story"
+						src={home.gallery[2].src}
+						alt={home.gallery[2].alt}
+						ratio="4/5"
+						tint="butter"
+						class="hero-card-media outline-frame"
+					/>
+					<p class="hero-polaroid-caption">{home.gallery[2].caption}</p>
+				</div>
+			</div>
 		</Reveal>
 	</div>
 </section>
 
-<Reveal>
-	<div class="flex justify-center">
-		<Squiggle class="text-marigold" />
+<!-- ============ 02 · WHAT I CREATE (blush) ============ -->
+<Wave fill="blush" size="lg" class="bg-paper" />
+<section class="bg-blush">
+	<div class="mx-auto max-w-6xl px-5 pt-10 pb-20 md:px-8 md:pt-14 md:pb-28">
+		<Reveal>
+			<h2 class="home-section-title font-display max-w-4xl">
+				{home.createTitle}
+			</h2>
+		</Reveal>
+
+		<div class="mt-14 grid gap-8 md:grid-cols-2">
+			<Reveal delay={80}>
+				<a
+					href={home.services[0].href}
+					class="card-lift group block rounded-[2.5rem] bg-violet p-6 text-paper"
+				>
+					<Placeholder label="photography cover" src={home.services[0].image.src} alt={home.services[0].image.alt} ratio="16/10" tint="blush" class="arch-soft outline-frame" />
+					<h3 class="font-display mt-6 text-2xl">{home.services[0].title}</h3>
+					<p class="mt-2 text-sm text-paper/75">
+						{home.services[0].text}
+					</p>
+				</a>
+			</Reveal>
+
+			<Reveal delay={180}>
+				<a href={home.services[1].href} class="card-lift group block rounded-[2.5rem] bg-marigold p-6">
+					<Placeholder label="social media cover" src={home.services[1].image.src} alt={home.services[1].image.alt} ratio="16/10" tint="mint" class="arch-soft outline-frame" />
+					<h3 class="font-display mt-6 text-2xl">{home.services[1].title}</h3>
+					<p class="mt-2 text-sm text-ink/70">
+						{home.services[1].text}
+					</p>
+				</a>
+			</Reveal>
+		</div>
 	</div>
-</Reveal>
-<section>
+</section>
+
+<!-- ============ 03 · ABOUT (teal) ============ -->
+<Wave fill="teal" size="lg" class="bg-blush" />
+<section class="bg-teal text-paper">
 	<div
-		class="mx-auto grid max-w-6xl items-center gap-12 px-5 py-20 md:grid-cols-[1fr_1.2fr] md:px-8 md:py-28"
+		class="mx-auto grid max-w-6xl items-center gap-14 px-5 pt-10 pb-20 md:grid-cols-[0.85fr_1.15fr] md:px-8 md:pt-14 md:pb-28"
 	>
 		<Reveal>
-			<Placeholder label="about photo" ratio="4/5" tint="butter" class="max-w-sm" />
+			<Placeholder label="about photo" src={home.aboutImage.src} alt={home.aboutImage.alt} ratio="4/5" tint="butter" class="arch max-w-sm outline-frame" />
 		</Reveal>
 		<Reveal delay={120}>
 			<div>
-				<SectionLabel text="Meet Ashleigh" accent="marigold" />
-				<h2 class="font-display mt-4 text-3xl leading-tight md:text-4xl">
-					Ut enim ad minim veniam quis nostrud
-				</h2>
-				<p class="mt-5 max-w-md leading-relaxed text-muted">
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-					ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-					ullamco laboris nisi ut aliquip ex ea commodo consequat.
+				<h2 class="home-section-title font-display">{home.aboutTitle}</h2>
+				<p class="mt-6 max-w-md leading-relaxed text-paper/80">
+					{home.aboutText}
 				</p>
-				<a
-					href="/about"
-					class="mt-8 inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.2em] underline decoration-marigold decoration-2 underline-offset-8 transition-colors hover:text-marigold"
-				>
-					More about me <Icon name="arrow" size={14} />
-				</a>
+				<a href="/about" class="home-link mt-9 text-paper">{home.aboutLink}</a>
 			</div>
 		</Reveal>
 	</div>
 </section>
 
-<div class="relative overflow-x-clip">
-	<div
-		class="animate-drift pointer-events-none absolute top-0 left-1/4 h-80 w-80 rounded-full bg-coral/30 blur-3xl"
-	></div>
-	<div
-		class="animate-drift-slow pointer-events-none absolute -right-20 bottom-0 h-96 w-96 rounded-full bg-paper/20 blur-3xl"
-	></div>
-	<Wave fill="violet" />
-	<section class="bg-violet text-paper">
-		<div class="relative mx-auto max-w-6xl px-5 py-20 text-center md:px-8 md:py-28">
-			<Reveal>
-				<span class="mx-auto inline-flex animate-float-spin">
-					<Icon name="spark" size={28} class="animate-spin-slow text-marigold" />
-				</span>
-				<h2 class="font-display mx-auto mt-6 max-w-2xl text-3xl leading-tight md:text-5xl">
-					Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore
-				</h2>
-				<a
-					href="/contact"
-					class="btn-fun mt-10 inline-flex items-center gap-2 rounded-full border border-paper bg-paper px-9 py-4 text-[12px] uppercase tracking-[0.2em] text-ink hover:bg-butter"
-				>
-					Get in touch <Icon name="arrow" size={14} />
-				</a>
-			</Reveal>
-		</div>
-	</section>
-</div>
+<!-- ============ 04 · CONTACT (violet) ============ -->
+<Wave fill="violet" size="lg" class="bg-teal" />
+<section class="bg-violet text-paper">
+	<div class="mx-auto max-w-6xl px-5 pt-10 pb-24 text-center md:px-8 md:pt-14 md:pb-32">
+		<Reveal>
+			<h2 class="home-section-title font-display mx-auto max-w-4xl">
+				{home.contactTitle}
+			</h2>
+			<a
+				href="/contact"
+				class="btn-fun outline-button mt-10 inline-flex items-center gap-2 rounded-full bg-paper px-9 py-4 text-[12px] uppercase tracking-[0.2em] text-ink hover:bg-butter"
+			>
+				{home.contactButton}
+			</a>
+		</Reveal>
+	</div>
+</section>

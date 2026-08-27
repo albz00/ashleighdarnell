@@ -1,0 +1,48 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    match /site/{document} {
+      allow read: if true;
+      allow write: if signedIn();
+    }
+
+    match /posts/{postId} {
+      allow read: if signedIn() || resource.data.status == 'published';
+      allow create, update, delete: if signedIn();
+    }
+
+    match /banners/{bannerId} {
+      allow read: if true;
+      allow create, update, delete: if signedIn();
+    }
+
+    match /campaigns/{campaignId} {
+      allow read, create, update, delete: if signedIn();
+    }
+
+    match /subscribers/{subscriberId} {
+      allow read, update, delete: if signedIn();
+      allow create: if
+        request.resource.data.keys().hasOnly([
+          'id',
+          'name',
+          'email',
+          'joinedAt',
+          'status'
+        ]) &&
+        request.resource.data.id == subscriberId &&
+        request.resource.data.email is string &&
+        request.resource.data.email.size() >= 3 &&
+        request.resource.data.email.size() <= 320 &&
+        request.resource.data.name is string &&
+        request.resource.data.name.size() <= 120 &&
+        request.resource.data.joinedAt is string &&
+        request.resource.data.status == 'active';
+    }
+  }
+}

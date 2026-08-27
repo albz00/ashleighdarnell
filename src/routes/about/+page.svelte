@@ -1,109 +1,126 @@
 <script lang="ts">
-	import Floater from '$lib/components/Floater.svelte';
-	import Icon from '$lib/components/Icon.svelte';
 	import Placeholder from '$lib/components/Placeholder.svelte';
 	import Reveal from '$lib/components/Reveal.svelte';
-	import SectionLabel from '$lib/components/SectionLabel.svelte';
 	import Wave from '$lib/components/Wave.svelte';
+	import { pageContent } from '$lib/content/page-content';
 
-	const facts = [
-		{ text: 'Lorem ipsum dolor sit amet consectetur', bg: 'bg-blush', num: 'text-coral' },
-		{ text: 'Adipiscing elit sed do eiusmod tempor', bg: 'bg-butter', num: 'text-marigold' },
-		{ text: 'Incididunt ut labore et dolore magna', bg: 'bg-mint', num: 'text-teal' },
-		{ text: 'Aliqua ut enim ad minim veniam quis', bg: 'bg-lilac', num: 'text-violet' }
+	const factStyles = [
+		{
+			bg: 'bg-blush',
+			accent: 'text-coral',
+			span: 'md:col-span-7'
+		},
+		{
+			bg: 'bg-butter',
+			accent: 'text-marigold',
+			span: 'md:col-span-5'
+		},
+		{
+			bg: 'bg-mint',
+			accent: 'text-teal',
+			span: 'md:col-span-5'
+		},
+		{
+			bg: 'bg-lilac',
+			accent: 'text-violet',
+			span: 'md:col-span-7'
+		}
 	];
+	const about = $derived($pageContent.about);
 </script>
 
 <svelte:head>
-	<title>About - Ashleigh Darnell</title>
+	<title>{about.seoTitle}</title>
 </svelte:head>
 
-<section class="relative overflow-x-clip">
+<section class="backdrop-forest bg-paper" style:--managed-bg={'url("' + about.background.src + '")'}>
 	<div
-		class="animate-drift pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-violet/15 blur-3xl"
-	></div>
-	<div
-		class="animate-drift-slow pointer-events-none absolute top-1/3 -right-28 h-80 w-80 rounded-full bg-marigold/20 blur-3xl"
-	></div>
-	<div
-		class="relative mx-auto grid max-w-6xl items-start gap-12 px-5 pt-16 pb-20 md:grid-cols-[1fr_1.2fr] md:px-8 md:pt-24"
+		class="mx-auto grid max-w-6xl items-center gap-16 px-5 pt-20 pb-24 md:grid-cols-[0.9fr_1.1fr] md:px-8 md:pt-28 md:pb-32"
 	>
-		<Reveal class="relative">
-			<Placeholder label="portrait" ratio="4/5" tint="lilac" />
-			<Floater tint="mint" size="md" class="-right-4 -bottom-4 hidden md:flex" />
-			<Floater
-				tint="butter"
-				size="sm"
-				motion="float"
-				spin="spin-wobble"
-				class="top-6 -left-5 hidden md:flex"
-				style="animation-delay: -2s"
-			/>
+		<Reveal>
+			<div class="page-polaroid -rotate-2">
+				<Placeholder label="portrait" src={about.portrait.src} alt={about.portrait.alt} ratio="4/5" tint="lilac" class="outline-frame" />
+				<p class="page-polaroid-caption">{about.portrait.caption}</p>
+			</div>
 		</Reveal>
 		<Reveal delay={120}>
 			<div>
-				<SectionLabel text="About" accent="marigold" />
-				<h1 class="font-display mt-6 text-4xl leading-tight tracking-tight md:text-6xl">
-					Lorem ipsum <span class="font-cursive text-[1.4em] leading-none text-violet">dolor sit</span> amet
+				<h1 class="page-display font-display">
+					{about.titlePrefix} <span class="font-cursive text-[1.4em] leading-none text-violet">{about.titleName}</span>
 				</h1>
 				<div class="mt-6 max-w-lg space-y-4 leading-relaxed text-muted">
-					<p>
-						Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-						incididunt ut labore et dolore magna aliqua.
-					</p>
-					<p>
-						Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
-						ea commodo consequat.
-					</p>
-					<p>
-						Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat
-						nulla pariatur.
-					</p>
+					{#each about.intro as paragraph}
+						<p>{paragraph}</p>
+					{/each}
 				</div>
 			</div>
 		</Reveal>
 	</div>
 </section>
 
-<div class="relative overflow-x-clip">
-	<div
-		class="animate-drift pointer-events-none absolute top-0 -right-20 h-72 w-72 rounded-full bg-blush/70 blur-3xl"
-	></div>
-	<div
-		class="animate-drift-slow pointer-events-none absolute bottom-0 -left-20 h-72 w-72 rounded-full bg-mint/70 blur-3xl"
-	></div>
-	<Wave fill="mist" />
-	<section class="bg-mist">
-		<div class="relative mx-auto max-w-6xl px-5 py-16 md:px-8">
+<Wave fill="mist" size="lg" class="bg-paper" />
+<section class="bg-mist">
+	<div class="mx-auto max-w-6xl px-5 pt-10 pb-20 md:px-8 md:pt-14 md:pb-28">
+		<div class="grid gap-6 md:grid-cols-[0.7fr_1.3fr] md:items-end">
 			<Reveal>
-				<SectionLabel text="A few things about me" accent="coral" />
+				<h2 class="page-section-title font-display">
+					{about.sectionTitle}
+				</h2>
 			</Reveal>
-			<div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-				{#each facts as fact, i (fact.text)}
-					<Reveal delay={i * 90}>
-						<div class="card-lift rounded-3xl border border-ink/10 p-6 {fact.bg}">
-							<p class="font-display text-3xl {fact.num}">0{i + 1}</p>
-							<p class="mt-3 text-sm">{fact.text}</p>
-						</div>
-					</Reveal>
-				{/each}
-			</div>
+			<Reveal delay={80}>
+				<p class="max-w-xl leading-relaxed text-muted md:justify-self-end">
+					{about.sectionText}
+				</p>
+			</Reveal>
 		</div>
-	</section>
-	<Wave fill="mist" flip />
-</div>
 
-<section>
-	<div class="mx-auto max-w-6xl px-5 py-20 text-center md:px-8">
+		<div class="mt-12 grid gap-5 md:grid-cols-12">
+			{#each about.facts as fact, i (fact.text)}
+				<Reveal delay={i * 90} class={factStyles[i]?.span ?? ''}>
+					<article
+						class="card-lift group relative h-full min-h-56 overflow-hidden rounded-[2.25rem] p-7 md:p-9 {factStyles[i]?.bg ?? 'bg-blush'}"
+					>
+						<span
+							class="absolute -right-3 -top-10 font-display text-[8rem] leading-none opacity-[0.07] transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110"
+							>{i + 1}</span
+						>
+						<p class="text-[11px] font-semibold uppercase tracking-[0.22em] {factStyles[i]?.accent ?? 'text-coral'}">
+							{fact.kicker}
+						</p>
+						<h3 class="font-display mt-8 max-w-md text-3xl leading-tight md:text-4xl">
+							{fact.title}
+						</h3>
+						<p class="mt-4 max-w-xl text-sm leading-relaxed text-ink/65">{fact.text}</p>
+					</article>
+				</Reveal>
+			{/each}
+		</div>
+
+		<Reveal delay={160}>
+			<div
+				class="mt-5 flex flex-col gap-3 rounded-[2rem] bg-teal px-7 py-6 text-paper md:flex-row md:items-center md:justify-between md:px-9"
+			>
+				<p class="font-display text-2xl">{about.gearTitle}</p>
+				<p class="text-sm text-paper/70">
+					{about.gearText}
+				</p>
+			</div>
+		</Reveal>
+	</div>
+</section>
+
+<Wave fill="violet" size="lg" class="bg-mist" />
+<section class="bg-violet text-paper">
+	<div class="mx-auto max-w-6xl px-5 pt-10 pb-24 text-center md:px-8 md:pt-14 md:pb-32">
 		<Reveal>
-			<h2 class="font-display mx-auto max-w-xl text-3xl leading-tight md:text-4xl">
-				Excepteur sint occaecat cupidatat non proident
+			<h2 class="page-section-title font-display mx-auto max-w-3xl">
+				{about.ctaTitle}
 			</h2>
 			<a
 				href="/contact"
-				class="btn-fun mt-8 inline-flex items-center gap-2 rounded-full border border-violet bg-violet px-9 py-4 text-[12px] uppercase tracking-[0.2em] text-paper hover:border-ink hover:bg-ink"
+				class="btn-fun mt-10 inline-flex rounded-full bg-paper px-9 py-4 text-[12px] uppercase tracking-[0.2em] text-ink hover:bg-butter"
 			>
-				Say hello <Icon name="arrow" size={14} />
+				{about.ctaButton}
 			</a>
 		</Reveal>
 	</div>
