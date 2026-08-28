@@ -47,6 +47,7 @@
 					rotationSeconds={featured.coverRotationSeconds}
 					ratio="16/11"
 					loading="eager"
+					fetchpriority="high"
 					class="h-full min-h-80 rounded-none"
 				/>
 				<div class="flex flex-col justify-center p-8 md:p-12">

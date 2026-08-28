@@ -8,10 +8,13 @@
 	const social = $derived($pageContent.social);
 	const accents = ['text-coral', 'text-teal', 'text-violet'];
 	const reelTints = ['mint', 'lilac', 'blush', 'butter'] as const;
+	let visibleReels = $state(10);
+	const displayedReels = $derived(social.reels.slice(0, visibleReels));
 </script>
 
 <svelte:head>
 	<title>{social.seoTitle}</title>
+	<link rel="preload" as="image" href={social.background.src} fetchpriority="high" />
 </svelte:head>
 
 <section
@@ -77,15 +80,40 @@
 		<h2 class="page-section-title font-display max-w-3xl">{social.contentTitle}</h2>
 	</Reveal>
 	<div class="mt-12 grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
-		{#each social.reels as reel, i (reel.src)}
+		{#each displayedReels as reel, i (`${reel.src}-${i}`)}
 			<Reveal delay={i * 80}>
 				<div class="page-polaroid group {i % 2 ? 'md:mt-10' : ''}">
-					<Placeholder label={reel.caption || `reel ${i + 1}`} src={reel.src} alt={reel.alt} rotation={reel.rotation} rotationSeconds={reel.rotationSeconds} ratio="9/16" tint={reelTints[i] ?? 'mint'} class="outline-frame" />
+					{#if reel.mediaType === 'video'}
+						<div class="aspect-[9/16] overflow-hidden rounded-3xl border border-ink/10 bg-ink outline-frame">
+							<video
+								src={reel.src}
+								aria-label={reel.alt || reel.caption || `Reel ${i + 1}`}
+								controls
+								muted
+								playsinline
+								preload="metadata"
+								class="h-full w-full object-cover"
+							></video>
+						</div>
+					{:else}
+						<Placeholder label={reel.caption || `reel ${i + 1}`} src={reel.src} alt={reel.alt} rotation={reel.rotation} rotationSeconds={reel.rotationSeconds} ratio="9/16" tint={reelTints[i] ?? 'mint'} class="outline-frame" />
+					{/if}
 					<p class="page-polaroid-caption">{reel.caption}</p>
 				</div>
 			</Reveal>
 		{/each}
 	</div>
+	{#if visibleReels < social.reels.length}
+		<div class="mt-12 text-center">
+			<button
+				type="button"
+				onclick={() => (visibleReels += 10)}
+				class="rounded-full border border-teal bg-paper px-7 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-teal transition-colors hover:bg-teal hover:text-paper"
+			>
+				Load 10 more reels
+			</button>
+		</div>
+	{/if}
 </section>
 
 <section>

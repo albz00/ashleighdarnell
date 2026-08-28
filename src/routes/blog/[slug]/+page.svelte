@@ -39,7 +39,7 @@
 		</header>
 
 		<div class="mx-auto max-w-6xl px-5 md:px-8">
-			<Photo src={post.cover} alt={post.alt} rotation={post.coverRotation} rotationSeconds={post.coverRotationSeconds} ratio="16/8" loading="eager" class="rounded-[2.5rem]" />
+			<Photo src={post.cover} alt={post.alt} rotation={post.coverRotation} rotationSeconds={post.coverRotationSeconds} ratio="16/8" loading="eager" fetchpriority="high" class="rounded-[2.5rem]" />
 			{#if post.coverCaption}<p class="mt-3 text-center text-sm text-muted">{post.coverCaption}</p>{/if}
 		</div>
 

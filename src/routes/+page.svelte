@@ -11,6 +11,7 @@
 <svelte:head>
 	<title>{home.seoTitle}</title>
 	<meta name="description" content={home.seoDescription} />
+	<link rel="preload" as="image" href={home.background.src} fetchpriority="high" />
 </svelte:head>
 
 <!-- ============ 01 · HERO ============ -->
@@ -112,6 +113,8 @@
 						alt={home.gallery[0].alt}
 						rotation={home.gallery[0].rotation}
 						rotationSeconds={home.gallery[0].rotationSeconds}
+						loading="eager"
+						fetchpriority="high"
 						ratio="4/5"
 						tint="blush"
 						class="hero-card-media outline-frame"

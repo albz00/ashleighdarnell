@@ -10,6 +10,8 @@
 		rotationSeconds = 8,
 		ratio = '3/4',
 		tint = 'mist',
+		loading = 'lazy',
+		fetchpriority = 'auto',
 		class: className = ''
 	}: {
 		label?: string;
@@ -20,6 +22,8 @@
 		rotationSeconds?: number;
 		ratio?: string;
 		tint?: 'mist' | 'blush' | 'butter' | 'mint' | 'lilac';
+		loading?: 'lazy' | 'eager';
+		fetchpriority?: 'high' | 'low' | 'auto';
 		class?: string;
 	} = $props();
 
@@ -59,7 +63,8 @@
 			use:rotateMedia={{
 				media: { src: src || images[index], alt: alt || label, rotation, rotationSeconds }
 			}}
-			loading="lazy"
+			{loading}
+			{fetchpriority}
 			decoding="async"
 			class="media-zoom h-full w-full object-cover"
 		/>

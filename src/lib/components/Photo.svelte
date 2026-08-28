@@ -8,7 +8,8 @@
 		rotationSeconds = 8,
 		ratio = '4/5',
 		class: className = '',
-		loading = 'lazy'
+		loading = 'lazy',
+		fetchpriority = 'auto'
 	}: {
 		src: string;
 		alt: string;
@@ -17,6 +18,7 @@
 		ratio?: string;
 		class?: string;
 		loading?: 'lazy' | 'eager';
+		fetchpriority?: 'high' | 'low' | 'auto';
 	} = $props();
 
 	let loaded = $state(false);
@@ -32,6 +34,7 @@
 		{alt}
 		use:rotateMedia={{ media: { src, alt, rotation, rotationSeconds } }}
 		{loading}
+		{fetchpriority}
 		decoding="async"
 		class="media-zoom h-full w-full object-cover opacity-0 transition-opacity duration-500 {loaded
 			? 'opacity-100'

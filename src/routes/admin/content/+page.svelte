@@ -7,6 +7,7 @@
 		type MediaContent,
 		type PageContent
 	} from '$lib/content/page-content';
+	import { photoFilters } from '$lib/content/photography';
 	import { savePageContent } from '$lib/firebase/repository';
 	import { auth } from '$lib/firebase/client';
 	import ImageSourcePicker from '$lib/components/admin/ImageSourcePicker.svelte';
@@ -43,11 +44,13 @@
 	let archive = $state<ArchiveImage[]>([]);
 	let accountHash = $state('');
 	let archiveLoading = $state(false);
+	let deletingSet = $state(false);
 	let uploading = $state(false);
 	let uploadProgress = $state('');
 	let setName = $state('Unsorted');
 	let setFilter = $state('All sets');
 	let urlImports = $state('');
+	let newPhotographyFilter = $state('');
 	let selectedImageIds = $state<string[]>([]);
 	let fileInput = $state<HTMLInputElement>();
 	let saveState = $state<'idle' | 'saving' | 'saved' | 'error'>('idle');
@@ -65,6 +68,9 @@
 			: archive.filter((image) => (image.meta?.setName || 'Unsorted') === setFilter)
 	);
 	const usedImages = $derived(collectUsedImages(draft));
+	const photographyFilters = $derived(
+		draft.photography.categories.filter((category) => category !== 'All')
+	);
 	const hasUnsavedChanges = $derived(
 		JSON.stringify(draft) !== JSON.stringify($pageContent)
 	);
@@ -134,6 +140,7 @@
 
 		for (const [key, value] of Object.entries(page)) {
 			if (key === 'navigation') continue;
+			if (selectedPage === 'photography' && key === 'categories') continue;
 			if (Array.isArray(value)) {
 				groups.push({ title: labelFor(key), fields: fieldsFrom(value, key) });
 			} else if (isMedia(value)) {
@@ -171,6 +178,184 @@
 		}
 		(Object.keys(content) as PageKey[]).forEach((page) => visit(content[page], page, ''));
 		return output;
+	}
+
+	function addPhotographyFilter() {
+		const value = newPhotographyFilter.trim();
+		if (!value) return;
+		if (
+			draft.photography.categories.some(
+				(category) => category.toLowerCase() === value.toLowerCase()
+			)
+		) {
+			notice = 'That photography filter already exists.';
+			return;
+		}
+		draft.photography.categories = [...draft.photography.categories, value];
+		newPhotographyFilter = '';
+		saveState = 'idle';
+		notice = '';
+	}
+
+	function addPhotographyShot() {
+		draft.photography.shots = [
+			...draft.photography.shots,
+			{
+				src: '',
+				alt: '',
+				caption: '',
+				mediaType: 'image',
+				metadata: { filters: [] }
+			}
+		];
+		saveState = 'idle';
+		notice = 'New photography slot added. Choose an image and assign its filters.';
+	}
+
+	function addSocialReel() {
+		draft.social.reels = [
+			...draft.social.reels,
+			{ src: '', alt: '', caption: '', mediaType: 'image' }
+		];
+		saveState = 'idle';
+		notice = 'New reel added. Choose an image or switch it to a video link.';
+	}
+
+	function removeMediaItem(path: string) {
+		const [group, indexValue] = path.split('.');
+		const index = Number(indexValue);
+		if (!Number.isInteger(index)) return;
+		const label = group === 'shots' ? 'photograph' : 'reel';
+		if (!window.confirm(`Remove this ${label} from the page?`)) return;
+		if (selectedPage === 'photography' && group === 'shots') {
+			draft.photography.shots = draft.photography.shots.filter(
+				(_, position) => position !== index
+			);
+		} else if (selectedPage === 'social' && group === 'reels') {
+			draft.social.reels = draft.social.reels.filter((_, position) => position !== index);
+		}
+		saveState = 'idle';
+		notice = `${label[0].toUpperCase()}${label.slice(1)} removed. Save changes to publish.`;
+	}
+
+	function setReelType(path: string, mediaType: 'image' | 'video') {
+		const field = sections
+			.flatMap((section) => section.fields)
+			.find((item) => item.kind === 'media' && item.path === path);
+		if (!field || field.kind !== 'media') return;
+		setPath(path, {
+			...field.value,
+			mediaType,
+			...(mediaType === 'video' ? { rotation: [] } : {})
+		});
+	}
+
+	function renamePhotographyFilter(current: string, replacement: string) {
+		const value = replacement.trim();
+		if (!value || value === current) return;
+		const categories = [...draft.photography.categories];
+		draft.photography.shots = draft.photography.shots.map((photo) => ({
+			...photo,
+			metadata: {
+				...(photo.metadata ?? {}),
+				filters: photoFilters(photo, categories).map((filter) =>
+					filter === current ? value : filter
+				)
+			}
+		}));
+		draft.photography.categories = categories.map((category) =>
+			category === current ? value : category
+		);
+		saveState = 'idle';
+		notice = '';
+	}
+
+	function removePhotographyFilter(filter: string) {
+		if (!window.confirm(`Remove the “${filter}” photography filter?`)) return;
+		const categories = [...draft.photography.categories];
+		draft.photography.shots = draft.photography.shots.map((photo) => ({
+			...photo,
+			metadata: {
+				...(photo.metadata ?? {}),
+				filters: photoFilters(photo, categories).filter((value) => value !== filter)
+			}
+		}));
+		draft.photography.categories = categories.filter((category) => category !== filter);
+		saveState = 'idle';
+		notice = '';
+	}
+
+	function togglePhotoFilter(path: string, filter: string, checked: boolean) {
+		const field = sections
+			.flatMap((section) => section.fields)
+			.find((item) => item.kind === 'media' && item.path === path);
+		if (!field || field.kind !== 'media') return;
+		const current = photoFilters(field.value, draft.photography.categories);
+		setPath(
+			`${path}.metadata`,
+			{
+				...(field.value.metadata ?? {}),
+				filters: checked
+					? Array.from(new Set([...current, filter]))
+					: current.filter((value) => value !== filter)
+			}
+		);
+	}
+
+	function setPhotoMetadata(
+		path: string,
+		key: 'location' | 'capturedAt' | 'keywords',
+		value: string
+	) {
+		const field = sections
+			.flatMap((section) => section.fields)
+			.find((item) => item.kind === 'media' && item.path === path);
+		if (!field || field.kind !== 'media') return;
+		setPath(`${path}.metadata`, {
+			...(field.value.metadata ?? {}),
+			[key]:
+				key === 'keywords'
+					? value
+							.split(',')
+							.map((keyword) => keyword.trim())
+							.filter(Boolean)
+					: value
+		});
+	}
+
+	function selectMedia(
+		path: string,
+		value: string,
+		image?: ArchiveImage
+	) {
+		setMedia(path, 'src', value);
+		const field = sections
+			.flatMap((section) => section.fields)
+			.find((item) => item.kind === 'media' && item.path === path);
+		if (!field || field.kind !== 'media') return;
+		const metadata = { ...(field.value.metadata ?? {}) };
+		if (image) {
+			metadata.cloudflareId = image.id;
+			metadata.setName = image.meta?.setName ?? 'Unsorted';
+			metadata.orientation = image.meta?.orientation ?? 'Unknown';
+			metadata.source = image.meta?.source ?? 'Cloudflare';
+			if (
+				selectedPage === 'photography' &&
+				path.startsWith('shots.') &&
+				image.meta?.setName &&
+				photographyFilters.includes(image.meta.setName)
+			) {
+				metadata.filters = Array.from(
+					new Set([...(metadata.filters ?? []), image.meta.setName])
+				);
+			}
+		} else {
+			delete metadata.cloudflareId;
+			delete metadata.setName;
+			delete metadata.orientation;
+			delete metadata.source;
+		}
+		setPath(`${path}.metadata`, metadata);
 	}
 
 	function archiveUrl(image: ArchiveImage) {
@@ -356,6 +541,38 @@
 		}
 	}
 
+	async function deleteImageSet() {
+		if (setFilter === 'All sets') return;
+		const images = filteredArchive;
+		const urls = new Set(images.map(archiveUrl));
+		const placements = usedImages.filter((image) => urls.has(image.src)).length;
+		const warning = placements
+			? ` ${placements} current site ${placements === 1 ? 'placement uses' : 'placements use'} images from this set and may break until replaced.`
+			: '';
+		if (
+			!window.confirm(
+				`Permanently delete all ${images.length} images in “${setFilter}” from Cloudflare?${warning}`
+			)
+		)
+			return;
+
+		deletingSet = true;
+		try {
+			const result = (await api(`?set=${encodeURIComponent(setFilter)}`, {
+				method: 'DELETE'
+			})) as { deleted: number };
+			const deletedIds = new Set(images.map((image) => image.id));
+			selectedImageIds = selectedImageIds.filter((id) => !deletedIds.has(id));
+			setFilter = 'All sets';
+			await loadArchive();
+			notice = `${result.deleted} ${result.deleted === 1 ? 'image' : 'images'} deleted from the set.`;
+		} catch (error) {
+			notice = error instanceof Error ? error.message : 'The image set could not be deleted.';
+		} finally {
+			deletingSet = false;
+		}
+	}
+
 	onMount(loadArchive);
 
 	function setPath(path: string, value: unknown) {
@@ -498,6 +715,87 @@
 		<p class="mt-5 rounded-2xl bg-mint px-5 py-3 text-sm text-teal">{notice}</p>
 	{/if}
 
+	{#if !showArchive && selectedPage === 'photography'}
+		<section class="mt-6 overflow-hidden rounded-[2rem] border border-line bg-paper">
+			<div class="flex flex-wrap items-center justify-between gap-4 border-b border-line px-6 py-5 md:px-8">
+				<div>
+					<h2 class="font-display text-3xl">Photography filters</h2>
+					<p class="mt-1 text-sm text-muted">
+						Add, rename, or remove the filters visitors use on the photography page.
+					</p>
+				</div>
+				<button
+					type="button"
+					onclick={addPhotographyShot}
+					class="rounded-full bg-coral px-5 py-3 text-xs font-semibold text-paper"
+				>
+					Add photograph
+				</button>
+			</div>
+			<div class="p-6 md:p-8">
+				<div class="flex flex-wrap gap-3">
+					<span class="rounded-full bg-ink px-4 py-2.5 text-xs text-paper">All</span>
+					{#each photographyFilters as filter (filter)}
+						<div class="flex items-center rounded-full border border-line bg-mist">
+							<input
+								value={filter}
+								aria-label="Rename {filter} filter"
+								onchange={(event) => renamePhotographyFilter(filter, event.currentTarget.value)}
+								class="w-28 bg-transparent py-2.5 pl-4 text-xs outline-none"
+							/>
+							<button
+								type="button"
+								onclick={() => removePhotographyFilter(filter)}
+								class="mr-1 rounded-full px-3 py-2 text-xs text-coral"
+								aria-label="Remove {filter} filter"
+							>
+								×
+							</button>
+						</div>
+					{/each}
+				</div>
+				<div class="mt-5 flex max-w-md gap-2">
+					<input
+						bind:value={newPhotographyFilter}
+						placeholder="New filter name"
+						onkeydown={(event) => {
+							if (event.key === 'Enter') {
+								event.preventDefault();
+								addPhotographyFilter();
+							}
+						}}
+						class="min-w-0 flex-1 rounded-full border border-line bg-mist px-4 py-2.5 text-sm outline-none focus:border-coral"
+					/>
+					<button
+						type="button"
+						onclick={addPhotographyFilter}
+						class="rounded-full bg-coral px-5 py-2.5 text-xs font-semibold text-paper"
+					>
+						Add filter
+					</button>
+				</div>
+			</div>
+		</section>
+	{/if}
+
+	{#if !showArchive && selectedPage === 'social'}
+		<section class="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-line bg-paper px-6 py-5 md:px-8">
+			<div>
+				<h2 class="font-display text-3xl">Social reels</h2>
+				<p class="mt-1 text-sm text-muted">
+					Add as many image or video reels as you need. The public page reveals them ten at a time.
+				</p>
+			</div>
+			<button
+				type="button"
+				onclick={addSocialReel}
+				class="rounded-full bg-teal px-5 py-3 text-xs font-semibold text-paper"
+			>
+				Add reel
+			</button>
+		</section>
+	{/if}
+
 	{#if showArchive}
 		<div class="mt-6 space-y-6">
 			<section class="overflow-hidden rounded-[2rem] border border-line bg-paper">
@@ -590,6 +888,16 @@
 						>
 							Select visible
 						</button>
+						{#if setFilter !== 'All sets'}
+							<button
+								type="button"
+								onclick={deleteImageSet}
+								disabled={deletingSet || !filteredArchive.length}
+								class="rounded-full border border-coral px-4 py-2.5 text-xs text-coral disabled:opacity-50"
+							>
+								{deletingSet ? 'Deleting set…' : 'Delete set'}
+							</button>
+						{/if}
 						<button
 							type="button"
 							onclick={loadArchive}
@@ -718,9 +1026,35 @@
 						{#each section.fields as field (field.path)}
 							{#if field.kind === 'media'}
 								<div class="rounded-3xl bg-mist p-4 md:col-span-2">
+									{#if (selectedPage === 'photography' && field.path.startsWith('shots.')) ||
+										(selectedPage === 'social' && field.path.startsWith('reels.'))}
+										<div class="mb-4 flex items-center justify-between gap-3">
+											<p class="text-sm font-semibold">{field.label}</p>
+											<button
+												type="button"
+												onclick={() => removeMediaItem(field.path)}
+												class="rounded-full px-4 py-2 text-xs text-coral"
+											>
+												Remove
+											</button>
+										</div>
+									{/if}
 									<div class="grid gap-5 md:grid-cols-[10rem_1fr]">
 										<div class="aspect-square overflow-hidden rounded-2xl bg-line">
-											{#if field.value.src && !imageErrors[field.path]}
+											{#if selectedPage === 'social' &&
+												field.path.startsWith('reels.') &&
+												field.value.mediaType === 'video' &&
+												field.value.src}
+												<video
+													src={field.value.src}
+													controls
+													muted
+													preload="metadata"
+													class="h-full w-full object-cover"
+												>
+													<track kind="captions" />
+												</video>
+											{:else if field.value.src && !imageErrors[field.path]}
 												<img
 													src={field.value.src}
 													alt={field.value.alt}
@@ -734,16 +1068,61 @@
 											{/if}
 										</div>
 										<div class="space-y-3">
-											<p class="text-sm font-semibold">{field.label}</p>
+											{#if !(
+												(selectedPage === 'photography' && field.path.startsWith('shots.')) ||
+												(selectedPage === 'social' && field.path.startsWith('reels.'))
+											)}
+												<p class="text-sm font-semibold">{field.label}</p>
+											{/if}
+											{#if selectedPage === 'social' && field.path.startsWith('reels.')}
+												<div>
+													<p class="mb-2 text-xs text-muted">Reel type</p>
+													<div class="flex w-fit rounded-full bg-line/60 p-1">
+														<button
+															type="button"
+															onclick={() => setReelType(field.path, 'image')}
+															class="rounded-full px-4 py-2 text-xs {field.value.mediaType !== 'video'
+																? 'bg-paper text-ink'
+																: 'text-muted'}"
+														>
+															Image
+														</button>
+														<button
+															type="button"
+															onclick={() => setReelType(field.path, 'video')}
+															class="rounded-full px-4 py-2 text-xs {field.value.mediaType === 'video'
+																? 'bg-paper text-ink'
+																: 'text-muted'}"
+														>
+															Video link
+														</button>
+													</div>
+												</div>
+											{/if}
 											<div>
-												<p class="mb-2 text-xs text-muted">Image source</p>
-												<ImageSourcePicker
-													value={field.value.src}
-													onselect={(value) => setMedia(field.path, 'src', value)}
-												/>
+												<p class="mb-2 text-xs text-muted">
+													{field.value.mediaType === 'video' ? 'Video URL' : 'Image source'}
+												</p>
+												{#if selectedPage === 'social' &&
+													field.path.startsWith('reels.') &&
+													field.value.mediaType === 'video'}
+													<input
+														value={field.value.src}
+														oninput={(event) => setMedia(field.path, 'src', event.currentTarget.value)}
+														placeholder="https://example.com/reel.mp4"
+														class="w-full rounded-2xl border border-line bg-paper px-4 py-3 text-sm outline-none focus:border-coral"
+													/>
+												{:else}
+													<ImageSourcePicker
+														value={field.value.src}
+														onselect={(value, image) => selectMedia(field.path, value, image)}
+													/>
+												{/if}
 											</div>
 											<label class="block">
-												<span class="text-xs text-muted">Image description</span>
+												<span class="text-xs text-muted">
+													{field.value.mediaType === 'video' ? 'Video description' : 'Image description'}
+												</span>
 												<input
 													value={field.value.alt}
 													oninput={(event) => setMedia(field.path, 'alt', event.currentTarget.value)}
@@ -761,7 +1140,69 @@
 											</label>
 										</div>
 									</div>
-									<div class="mt-5 border-t border-line pt-5">
+									{#if selectedPage === 'photography' && field.path.startsWith('shots.')}
+										<div class="mt-5 border-t border-line pt-5">
+											<p class="text-xs font-semibold">Photography metadata</p>
+											<p class="mt-1 text-[11px] text-muted">
+												The public gallery uses these assignments when a visitor chooses a filter.
+											</p>
+											<div class="mt-4 flex flex-wrap gap-2">
+												{#each photographyFilters as filter (filter)}
+													<label class="flex cursor-pointer items-center gap-2 rounded-full border border-line bg-paper px-3 py-2 text-xs">
+														<input
+															type="checkbox"
+															checked={photoFilters(field.value, draft.photography.categories).includes(filter)}
+															onchange={(event) =>
+																togglePhotoFilter(field.path, filter, event.currentTarget.checked)}
+															class="accent-coral"
+														/>
+														{filter}
+													</label>
+												{/each}
+											</div>
+											<div class="mt-4 grid gap-3 md:grid-cols-3">
+												<label class="block">
+													<span class="text-[11px] text-muted">Location</span>
+													<input
+														value={field.value.metadata?.location ?? ''}
+														oninput={(event) =>
+															setPhotoMetadata(field.path, 'location', event.currentTarget.value)}
+														placeholder="Nashville, TN"
+														class="mt-1.5 w-full rounded-2xl border border-line bg-paper px-4 py-3 text-sm outline-none focus:border-coral"
+													/>
+												</label>
+												<label class="block">
+													<span class="text-[11px] text-muted">Date captured</span>
+													<input
+														type="date"
+														value={field.value.metadata?.capturedAt ?? ''}
+														oninput={(event) =>
+															setPhotoMetadata(field.path, 'capturedAt', event.currentTarget.value)}
+														class="mt-1.5 w-full rounded-2xl border border-line bg-paper px-4 py-3 text-sm outline-none focus:border-coral"
+													/>
+												</label>
+												<label class="block">
+													<span class="text-[11px] text-muted">Keywords, separated by commas</span>
+													<input
+														value={field.value.metadata?.keywords?.join(', ') ?? ''}
+														onchange={(event) =>
+															setPhotoMetadata(field.path, 'keywords', event.currentTarget.value)}
+														placeholder="sunset, portrait, outdoors"
+														class="mt-1.5 w-full rounded-2xl border border-line bg-paper px-4 py-3 text-sm outline-none focus:border-coral"
+													/>
+												</label>
+											</div>
+											{#if field.value.metadata?.cloudflareId}
+												<div class="mt-4 flex flex-wrap gap-x-5 gap-y-1 rounded-2xl bg-paper px-4 py-3 text-[11px] text-muted">
+													<span>Set: {field.value.metadata.setName || 'Unsorted'}</span>
+													<span>Orientation: {field.value.metadata.orientation || 'Unknown'}</span>
+													<span>Source: {field.value.metadata.source || 'Cloudflare'}</span>
+												</div>
+											{/if}
+										</div>
+									{/if}
+									{#if field.value.mediaType !== 'video'}
+										<div class="mt-5 border-t border-line pt-5">
 										<div class="flex flex-wrap items-center justify-between gap-3">
 											<div>
 												<p class="text-xs font-semibold">Rotating images</p>
@@ -810,7 +1251,8 @@
 												</button>
 											</div>
 										{/each}
-									</div>
+										</div>
+									{/if}
 								</div>
 							{:else}
 								<label class="block {field.multiline ? 'md:col-span-2' : ''}">

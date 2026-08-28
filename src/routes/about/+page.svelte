@@ -32,6 +32,7 @@
 
 <svelte:head>
 	<title>{about.seoTitle}</title>
+	<link rel="preload" as="image" href={about.background.src} fetchpriority="high" />
 </svelte:head>
 
 <section

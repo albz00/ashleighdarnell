@@ -3,25 +3,41 @@
 	import Reveal from '$lib/components/Reveal.svelte';
 	import Wave from '$lib/components/Wave.svelte';
 	import { pageContent } from '$lib/content/page-content';
+	import { photoFilters } from '$lib/content/photography';
 	import { rotateMedia } from '$lib/actions/rotate-media';
 
 	let active = $state('All');
+	let visibleShots = $state(10);
 
 	type Tint = 'blush' | 'butter' | 'mint' | 'lilac';
 	const tints: Tint[] = ['blush', 'butter', 'mint', 'lilac'];
 	const ratios = ['3/4', '4/5', '1/1', '4/5', '3/4', '1/1', '4/5', '3/4', '1/1'];
 	const photography = $derived($pageContent.photography);
-	const shots = $derived(
+	const allShots = $derived(
 		photography.shots.map((shot, index) => ({
 			...shot,
 			ratio: ratios[index] ?? '4/5',
 			tint: tints[index % tints.length]
 		}))
 	);
+	const filteredShots = $derived(
+		allShots.filter(
+			(shot) => active === 'All' || photoFilters(shot, photography.categories).includes(active)
+		)
+	);
+	const shots = $derived(filteredShots.slice(0, visibleShots));
+
+	$effect(() => {
+		if (!photography.categories.includes(active)) {
+			active = 'All';
+			visibleShots = 10;
+		}
+	});
 </script>
 
 <svelte:head>
 	<title>{photography.seoTitle}</title>
+	<link rel="preload" as="image" href={photography.background.src} fetchpriority="high" />
 </svelte:head>
 
 <section
@@ -54,7 +70,10 @@
 	<div class="mx-auto flex max-w-6xl gap-2 overflow-x-auto px-5 py-3 md:px-8">
 		{#each photography.categories as category (category)}
 			<button
-				onclick={() => (active = category)}
+				onclick={() => {
+					active = category;
+					visibleShots = 10;
+				}}
 				class="whitespace-nowrap rounded-full border px-4 py-1.5 text-[11px] uppercase tracking-[0.15em] transition-all duration-200
 					{active === category
 					? 'border-coral bg-coral text-paper'
@@ -75,8 +94,21 @@
 					<p class="page-polaroid-caption">{shot.caption}</p>
 				</div>
 			</Reveal>
+		{:else}
+			<p class="py-16 text-center text-sm text-muted">No photographs match this filter yet.</p>
 		{/each}
 	</div>
+	{#if visibleShots < filteredShots.length}
+		<div class="mt-12 text-center">
+			<button
+				type="button"
+				onclick={() => (visibleShots += 10)}
+				class="rounded-full border border-coral bg-paper px-7 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-coral transition-colors hover:bg-coral hover:text-paper"
+			>
+				Load 10 more photographs
+			</button>
+		</div>
+	{/if}
 </section>
 
 <div>

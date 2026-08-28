@@ -6,8 +6,19 @@ export type MediaContent = {
 	src: string;
 	alt: string;
 	caption?: string;
+	mediaType?: 'image' | 'video';
 	rotation?: string[];
 	rotationSeconds?: number;
+	metadata?: {
+		filters?: string[];
+		location?: string;
+		capturedAt?: string;
+		keywords?: string[];
+		cloudflareId?: string;
+		setName?: string;
+		orientation?: string;
+		source?: string;
+	};
 };
 
 export type NavItem = { label: string; href: string };
@@ -221,15 +232,15 @@ export const defaultPageContent: PageContent = {
 			'From Appalachian landscapes and Nashville sunsets to wildlife and portraits, I photograph the places, people, and moments that make me stop and look.',
 		categories: ['All', 'Wildlife', 'Portraits', 'Lifestyle', 'Landscape'],
 		shots: [
-			{ src: images.deer, alt: 'Deer in a field', caption: 'Wildlife' },
-			{ src: images.portrait, alt: 'Outdoor portrait', caption: 'Portrait' },
-			{ src: images.mountains, alt: 'Mountain ridges', caption: 'Appalachia' },
-			{ src: images.owl, alt: 'Owl on a branch', caption: 'Wildlife' },
-			{ src: images.lake, alt: 'Mountain lake', caption: 'Still water' },
-			{ src: images.portraitTwo, alt: 'Natural light portrait', caption: 'Portrait' },
-			{ src: images.desert, alt: 'Open landscape', caption: 'On the road' },
-			{ src: images.forest, alt: 'Forest path', caption: 'In the woods' },
-			{ src: images.portraitThree, alt: 'Editorial portrait', caption: 'Editorial' }
+			{ src: images.deer, alt: 'Deer in a field', caption: 'Wildlife', metadata: { filters: ['Wildlife'] } },
+			{ src: images.portrait, alt: 'Outdoor portrait', caption: 'Portrait', metadata: { filters: ['Portraits'] } },
+			{ src: images.mountains, alt: 'Mountain ridges', caption: 'Appalachia', metadata: { filters: ['Landscape'] } },
+			{ src: images.owl, alt: 'Owl on a branch', caption: 'Wildlife', metadata: { filters: ['Wildlife'] } },
+			{ src: images.lake, alt: 'Mountain lake', caption: 'Still water', metadata: { filters: ['Landscape'] } },
+			{ src: images.portraitTwo, alt: 'Natural light portrait', caption: 'Portrait', metadata: { filters: ['Portraits'] } },
+			{ src: images.desert, alt: 'Open landscape', caption: 'On the road', metadata: { filters: ['Lifestyle', 'Landscape'] } },
+			{ src: images.forest, alt: 'Forest path', caption: 'In the woods', metadata: { filters: ['Landscape'] } },
+			{ src: images.portraitThree, alt: 'Editorial portrait', caption: 'Editorial', metadata: { filters: ['Portraits', 'Lifestyle'] } }
 		],
 		ctaTitle: 'Ready to step in front of the camera?',
 		ctaText: 'Solo, couples, families, weddings, and events are all welcome.',

@@ -6,7 +6,7 @@
 		id: string;
 		filename: string;
 		uploaded: string;
-		meta?: { setName?: string };
+		meta?: { setName?: string; source?: string; orientation?: string };
 		variants: string[];
 	};
 
@@ -15,7 +15,7 @@
 		onselect
 	}: {
 		value: string;
-		onselect: (value: string) => void;
+		onselect: (value: string, image?: ArchiveImage) => void;
 	} = $props();
 
 	let mode = $state<'link' | 'library'>('link');
@@ -79,7 +79,7 @@
 	}
 
 	function choose(image: ArchiveImage) {
-		onselect(imageUrl(image));
+		onselect(imageUrl(image), image);
 		open = false;
 	}
 </script>
