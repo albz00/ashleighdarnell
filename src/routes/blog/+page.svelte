@@ -19,7 +19,7 @@
 	<meta name="description" content={blog.seoDescription} />
 </svelte:head>
 
-<section class="backdrop-mountains bg-paper">
+<section class="backdrop-mountains bg-paper" data-content-section="blog.hero" data-content-label="Blog → Hero">
 	<div class="mx-auto max-w-6xl px-5 pb-16 pt-20 md:px-8 md:pb-20 md:pt-28">
 		<Reveal>
 			<p class="home-kicker text-coral">{blog.kicker}</p>
@@ -34,7 +34,7 @@
 </section>
 
 {#if featured}
-	<section class="mx-auto max-w-6xl px-5 py-14 md:px-8 md:py-20">
+	<section class="mx-auto max-w-6xl px-5 py-14 md:px-8 md:py-20" data-content-section="blog.featured" data-content-label="Blog → Featured post">
 		<Reveal>
 			<a
 				href="/blog/{featured.slug}"
@@ -64,7 +64,7 @@
 {/if}
 
 <Wave fill="mist" size="lg" class="bg-paper" />
-<section class="bg-mist">
+<section class="bg-mist" data-content-section="blog.recent" data-content-label="Blog → Recent posts">
 	<div class="mx-auto max-w-6xl px-5 pb-24 pt-10 md:px-8 md:pb-28 md:pt-14">
 		<Reveal><h2 class="page-section-title font-display">{blog.recentTitle}</h2></Reveal>
 		<div class="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">

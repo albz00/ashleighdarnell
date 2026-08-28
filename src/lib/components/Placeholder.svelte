@@ -12,6 +12,7 @@
 		tint = 'mist',
 		loading = 'lazy',
 		fetchpriority = 'auto',
+		builderInfo = '',
 		class: className = ''
 	}: {
 		label?: string;
@@ -24,8 +25,10 @@
 		tint?: 'mist' | 'blush' | 'butter' | 'mint' | 'lilac';
 		loading?: 'lazy' | 'eager';
 		fetchpriority?: 'high' | 'low' | 'auto';
+		builderInfo?: string;
 		class?: string;
 	} = $props();
+	let dimensions = $state('');
 
 	const tints = {
 		mist: 'bg-mist',
@@ -50,10 +53,29 @@
 	const index = $derived(
 		Math.abs([...label].reduce((total, character) => total + character.charCodeAt(0), 0)) % images.length
 	);
+	const sourceLabel = $derived(
+		(src || images[index]).includes('imagedelivery.net') ? 'Cloudflare' : 'External'
+	);
+	const builderMetadata = $derived(
+		[
+			dimensions || 'Loading dimensions',
+			sourceLabel,
+			rotation.length ? `${rotation.length + 1} rotating` : 'Single image',
+			builderInfo
+		]
+			.filter(Boolean)
+			.join(' · ')
+	);
+
+	function imageLoaded(event: Event) {
+		const image = event.currentTarget as HTMLImageElement;
+		dimensions = `${image.naturalWidth}×${image.naturalHeight}`;
+	}
 </script>
 
 <div
 	class="relative overflow-hidden rounded-3xl border border-ink/10 {className}"
+	data-builder-media={builderMetadata}
 	style="aspect-ratio: {ratio};"
 >
 	<div class="absolute inset-0 {tints[tint]}">
@@ -67,6 +89,7 @@
 			{fetchpriority}
 			decoding="async"
 			class="media-zoom h-full w-full object-cover"
+			onload={imageLoaded}
 		/>
 		{#if caption}
 			<p class="absolute inset-x-3 bottom-3 rounded-full bg-ink/65 px-3 py-1.5 text-center text-[10px] text-paper backdrop-blur-sm">

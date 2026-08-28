@@ -19,6 +19,8 @@
 
 <section
 	class="backdrop-studio relative bg-paper"
+	data-content-section="social.hero"
+	data-content-label="Social → Hero"
 	style:--managed-bg={'url("' + social.background.src + '")'}
 	use:rotateMedia={{ media: social.background, background: true }}
 >
@@ -43,7 +45,7 @@
 	{/if}
 </section>
 
-<section class="mx-auto max-w-6xl px-5 pt-12 md:px-8 md:pt-16">
+<section class="mx-auto max-w-6xl px-5 pt-12 md:px-8 md:pt-16" data-content-section="social.background" data-content-label="Social → Background">
 	<Reveal>
 		<div class="flex items-center gap-4">
 			<p class="shrink-0 text-[10px] font-bold uppercase tracking-[0.24em] text-muted">
@@ -75,7 +77,7 @@
 	</div>
 </section>
 
-<section class="mx-auto max-w-6xl px-5 py-16 md:px-8 md:py-24">
+<section class="mx-auto max-w-6xl px-5 py-16 md:px-8 md:py-24" data-content-section="social.reels" data-content-label="Social → Reels">
 	<Reveal>
 		<h2 class="page-section-title font-display max-w-3xl">{social.contentTitle}</h2>
 	</Reveal>
@@ -84,7 +86,10 @@
 			<Reveal delay={i * 80}>
 				<div class="page-polaroid group {i % 2 ? 'md:mt-10' : ''}">
 					{#if reel.mediaType === 'video'}
-						<div class="aspect-[9/16] overflow-hidden rounded-3xl border border-ink/10 bg-ink outline-frame">
+						<div
+							class="relative aspect-[9/16] overflow-hidden rounded-3xl border border-ink/10 bg-ink outline-frame"
+							data-builder-media="Loading dimensions · External · Video"
+						>
 							<video
 								src={reel.src}
 								aria-label={reel.alt || reel.caption || `Reel ${i + 1}`}
@@ -93,6 +98,11 @@
 								playsinline
 								preload="metadata"
 								class="h-full w-full object-cover"
+								onloadedmetadata={(event) =>
+									event.currentTarget.parentElement?.setAttribute(
+										'data-builder-media',
+										`${event.currentTarget.videoWidth}×${event.currentTarget.videoHeight} · External · Video`
+									)}
 							></video>
 						</div>
 					{:else}
@@ -116,7 +126,7 @@
 	{/if}
 </section>
 
-<section>
+<section data-content-section="social.services" data-content-label="Social → Services">
 	<div class="mx-auto max-w-6xl px-5 py-16 md:px-8 md:py-20">
 		<Reveal>
 			<h2 class="page-section-title font-display max-w-3xl">{social.servicesTitle}</h2>
@@ -143,7 +153,7 @@
 
 <div>
 	<Wave fill="mint" size="lg" class="bg-paper" />
-	<section class="bg-mint">
+	<section class="bg-mint" data-content-section="social.cta" data-content-label="Social → Contact callout">
 		<div
 			class="mx-auto flex max-w-6xl flex-col items-start gap-8 px-5 pt-10 pb-24 md:flex-row md:items-center md:justify-between md:px-8 md:pt-14 md:pb-28"
 		>

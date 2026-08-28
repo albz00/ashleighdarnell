@@ -17,6 +17,8 @@
 <!-- ============ 01 · HERO ============ -->
 <section
 	class="hero-story backdrop-mountains relative overflow-hidden bg-paper"
+	data-content-section="home.hero"
+	data-content-label="Home → Hero"
 	style:--managed-bg={'url("' + home.background.src + '")'}
 	use:rotateMedia={{ media: home.background, background: true }}
 >
@@ -159,7 +161,7 @@
 
 <!-- ============ 02 · WHAT I CREATE (blush) ============ -->
 <Wave fill="blush" size="lg" class="bg-paper" />
-<section class="bg-blush">
+<section class="bg-blush" data-content-section="home.services" data-content-label="Home → Services">
 	<div class="mx-auto max-w-6xl px-5 pt-10 pb-20 md:px-8 md:pt-14 md:pb-28">
 		<Reveal>
 			<h2 class="home-section-title font-display max-w-4xl">
@@ -196,7 +198,7 @@
 
 <!-- ============ 03 · ABOUT (teal) ============ -->
 <Wave fill="teal" size="lg" class="bg-blush" />
-<section class="bg-teal text-paper">
+<section class="bg-teal text-paper" data-content-section="home.about" data-content-label="Home → About preview">
 	<div
 		class="mx-auto grid max-w-6xl items-center gap-14 px-5 pt-10 pb-20 md:grid-cols-[0.85fr_1.15fr] md:px-8 md:pt-14 md:pb-28"
 	>
@@ -217,7 +219,7 @@
 
 <!-- ============ 04 · CONTACT (violet) ============ -->
 <Wave fill="violet" size="lg" class="bg-teal" />
-<section class="bg-violet text-paper">
+<section class="bg-violet text-paper" data-content-section="home.contact" data-content-label="Home → Contact callout">
 	<div class="mx-auto max-w-6xl px-5 pt-10 pb-24 text-center md:px-8 md:pt-14 md:pb-32">
 		<Reveal>
 			<h2 class="home-section-title font-display mx-auto max-w-4xl">

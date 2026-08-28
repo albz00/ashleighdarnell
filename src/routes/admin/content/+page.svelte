@@ -16,7 +16,14 @@
 	type Field =
 		| { kind: 'text'; path: string; label: string; value: string; multiline: boolean }
 		| { kind: 'media'; path: string; label: string; value: MediaContent };
-	type Section = { title: string; fields: Field[] };
+	type Section = {
+		id: string;
+		title: string;
+		description: string;
+		location: string;
+		fields: Field[];
+	};
+	type SectionDefinition = Omit<Section, 'fields'> & { keys: string[] };
 	type ArchiveImage = {
 		id: string;
 		filename: string;
@@ -35,6 +42,248 @@
 		{ id: 'contact', label: 'Contact', href: '/contact' },
 		{ id: 'blog', label: 'Blog shell', href: '/blog' }
 	];
+	const sectionDefinitions: Record<PageKey, SectionDefinition[]> = {
+		global: [
+			{
+				id: 'global.header',
+				title: 'Header identity',
+				description: 'The name and home label shown in the site header.',
+				location: 'Global → Header',
+				keys: ['firstName', 'lastName', 'homeLabel']
+			},
+			{
+				id: 'global.footer',
+				title: 'Footer',
+				description: 'Footer introduction, links, newsletter form, and admin link wording.',
+				location: 'Global → Footer',
+				keys: [
+					'footerTagline',
+					'footerCtaLabel',
+					'footerExploreTitle',
+					'newsletterTitle',
+					'newsletterDescription',
+					'newsletterPlaceholder',
+					'newsletterButton',
+					'newsletterInvalid',
+					'newsletterExisting',
+					'newsletterSuccess',
+					'adminLabel'
+				]
+			}
+		],
+		home: [
+			{
+				id: 'home.seo',
+				title: 'Search listing',
+				description: 'The page title and description used by search engines and browser tabs.',
+				location: 'Home → Search & browser',
+				keys: ['seoTitle', 'seoDescription']
+			},
+			{
+				id: 'home.hero',
+				title: 'Hero',
+				description: 'The first section visitors see, including its heading, buttons, and layered images.',
+				location: 'Home → Hero',
+				keys: ['background', 'heroLines', 'intro', 'primaryCta', 'secondaryCta', 'backdrops', 'gallery']
+			},
+			{
+				id: 'home.services',
+				title: 'Featured services',
+				description: 'The photography and social media cards directly below the hero.',
+				location: 'Home → Featured services',
+				keys: ['createTitle', 'services']
+			},
+			{
+				id: 'home.about',
+				title: 'About preview',
+				description: 'The short introduction and portrait that lead visitors to the About page.',
+				location: 'Home → About preview',
+				keys: ['aboutTitle', 'aboutText', 'aboutLink', 'aboutImage']
+			},
+			{
+				id: 'home.contact',
+				title: 'Contact callout',
+				description: 'The final invitation and button at the bottom of the home page.',
+				location: 'Home → Contact callout',
+				keys: ['contactTitle', 'contactButton']
+			}
+		],
+		photography: [
+			{
+				id: 'photography.seo',
+				title: 'Search listing',
+				description: 'The browser and search result title for the photography page.',
+				location: 'Photography → Search & browser',
+				keys: ['seoTitle']
+			},
+			{
+				id: 'photography.hero',
+				title: 'Hero',
+				description: 'The page heading, introduction, and large background image.',
+				location: 'Photography → Hero',
+				keys: ['background', 'title', 'intro']
+			},
+			{
+				id: 'photography.gallery',
+				title: 'Photography gallery',
+				description: 'Every photograph, caption, filter assignment, and rotation setting.',
+				location: 'Photography → Gallery',
+				keys: ['shots']
+			},
+			{
+				id: 'photography.cta',
+				title: 'Contact callout',
+				description: 'The booking invitation below the photography gallery.',
+				location: 'Photography → Contact callout',
+				keys: ['ctaTitle', 'ctaText', 'ctaButton']
+			}
+		],
+		social: [
+			{
+				id: 'social.seo',
+				title: 'Search listing',
+				description: 'The browser and search result title for the social media page.',
+				location: 'Social → Search & browser',
+				keys: ['seoTitle']
+			},
+			{
+				id: 'social.hero',
+				title: 'Hero',
+				description: 'The page heading, introduction, and large background image.',
+				location: 'Social → Hero',
+				keys: ['background', 'title', 'intro']
+			},
+			{
+				id: 'social.background',
+				title: 'Background & experience',
+				description: 'The rows explaining experience and approach.',
+				location: 'Social → Background',
+				keys: ['backgroundTitle', 'backgroundItems']
+			},
+			{
+				id: 'social.reels',
+				title: 'Reels',
+				description: 'The image and video reels displayed in the social gallery.',
+				location: 'Social → Reels',
+				keys: ['contentTitle', 'reels']
+			},
+			{
+				id: 'social.services',
+				title: 'Services',
+				description: 'The list of available social media services.',
+				location: 'Social → Services',
+				keys: ['servicesTitle', 'services']
+			},
+			{
+				id: 'social.cta',
+				title: 'Contact callout',
+				description: 'The final invitation below social media services.',
+				location: 'Social → Contact callout',
+				keys: ['ctaTitle', 'ctaText', 'ctaButton']
+			}
+		],
+		about: [
+			{
+				id: 'about.seo',
+				title: 'Search listing',
+				description: 'The browser and search result title for the About page.',
+				location: 'About → Search & browser',
+				keys: ['seoTitle']
+			},
+			{
+				id: 'about.hero',
+				title: 'Introduction',
+				description: 'The opening portrait, name, introduction, and background image.',
+				location: 'About → Hero',
+				keys: ['background', 'portrait', 'titlePrefix', 'titleName', 'intro']
+			},
+			{
+				id: 'about.story',
+				title: 'Story, facts & gear',
+				description: 'The main biography, fact cards, and equipment note.',
+				location: 'About → Story & facts',
+				keys: ['sectionTitle', 'sectionText', 'facts', 'gearTitle', 'gearText']
+			},
+			{
+				id: 'about.cta',
+				title: 'Contact callout',
+				description: 'The final invitation at the bottom of the About page.',
+				location: 'About → Contact callout',
+				keys: ['ctaTitle', 'ctaButton']
+			}
+		],
+		contact: [
+			{
+				id: 'contact.seo',
+				title: 'Search listing',
+				description: 'The browser and search result title for the Contact page.',
+				location: 'Contact → Search & browser',
+				keys: ['seoTitle']
+			},
+			{
+				id: 'contact.main',
+				title: 'Contact introduction',
+				description: 'The page heading, introduction, email address, and service locations.',
+				location: 'Contact → Introduction',
+				keys: ['titleBefore', 'titleAccent', 'titleAfter', 'intro', 'email', 'locations']
+			},
+			{
+				id: 'contact.form',
+				title: 'Inquiry form',
+				description: 'Labels, placeholders, options, button, and notice in the contact form.',
+				location: 'Contact → Inquiry form',
+				keys: [
+					'nameLabel',
+					'namePlaceholder',
+					'emailLabel',
+					'emailPlaceholder',
+					'interestLabel',
+					'interestOptions',
+					'messageLabel',
+					'messagePlaceholder',
+					'sendButton',
+					'formNotice'
+				]
+			}
+		],
+		blog: [
+			{
+				id: 'blog.seo',
+				title: 'Search listing',
+				description: 'The Blog page title and description used by search engines.',
+				location: 'Blog → Search & browser',
+				keys: ['seoTitle', 'seoDescription']
+			},
+			{
+				id: 'blog.hero',
+				title: 'Blog introduction',
+				description: 'The heading and introduction above all blog posts.',
+				location: 'Blog → Hero',
+				keys: ['kicker', 'titleBefore', 'titleAccent', 'intro']
+			},
+			{
+				id: 'blog.featured',
+				title: 'Post labels',
+				description: 'Labels used on featured posts and individual article pages.',
+				location: 'Blog → Featured & article labels',
+				keys: ['featuredLabel', 'readLabel', 'backLabel', 'relatedTitle']
+			},
+			{
+				id: 'blog.recent',
+				title: 'Recent posts',
+				description: 'The heading above the recent post grid.',
+				location: 'Blog → Recent posts',
+				keys: ['recentTitle']
+			},
+			{
+				id: 'blog.not-found',
+				title: 'Missing article message',
+				description: 'The message shown when a blog link cannot be found.',
+				location: 'Blog → Missing article',
+				keys: ['notFoundTitle', 'notFoundText', 'notFoundButton']
+			}
+		]
+	};
 
 	let selectedPage = $state<PageKey>('home');
 	let showArchive = $state(false);
@@ -55,9 +304,16 @@
 	let fileInput = $state<HTMLInputElement>();
 	let saveState = $state<'idle' | 'saving' | 'saved' | 'error'>('idle');
 	let saveResetTimer: ReturnType<typeof setTimeout> | undefined;
+	let contentSearch = $state('');
+	let previewOpen = $state(true);
+	let previewDevice = $state<'desktop' | 'tablet' | 'mobile'>('desktop');
+	let previewInspect = $state(true);
+	let previewFrame = $state<HTMLIFrameElement>();
+	let selectedSection = $state('home.hero');
 
 	const currentPage = $derived(pages.find((item) => item.id === selectedPage) ?? pages[1]);
 	const sections = $derived(buildSections(draft[selectedPage]));
+	const visibleSections = $derived(filterSections(sections, contentSearch));
 	const archiveSets = $derived([
 		'All sets',
 		...Array.from(new Set(archive.map((image) => image.meta?.setName || 'Unsorted'))).sort()
@@ -92,6 +348,23 @@
 		);
 	}
 
+	function itemLabel(path: string, index: number) {
+		const collection = path.split('.').at(-1) ?? path;
+		const names: Record<string, string> = {
+			heroLines: 'Heading line',
+			backdrops: 'Backdrop image',
+			gallery: 'Gallery image',
+			services: 'Service',
+			shots: 'Photograph',
+			backgroundItems: 'Experience row',
+			reels: 'Reel',
+			intro: 'Paragraph',
+			facts: 'Fact card',
+			interestOptions: 'Interest option'
+		};
+		return `${names[collection] ?? 'Item'} ${index + 1}`;
+	}
+
 	function fieldsFrom(value: unknown, path: string, prefix = ''): Field[] {
 		if (isMedia(value)) {
 			return [{ kind: 'media', path, label: prefix || 'Image', value }];
@@ -111,15 +384,16 @@
 		}
 		if (Array.isArray(value)) {
 			return value.flatMap((item, index) => {
+				const label = itemLabel(path, index);
 				if (typeof item === 'string') {
-					return fieldsFrom(item, `${path}.${index}`, `Item ${index + 1}`);
+					return fieldsFrom(item, `${path}.${index}`, label);
 				}
 				if (isMedia(item)) {
-					return fieldsFrom(item, `${path}.${index}`, item.caption || `Image ${index + 1}`);
+					return fieldsFrom(item, `${path}.${index}`, item.caption || label);
 				}
 				if (item && typeof item === 'object') {
 					return Object.entries(item).flatMap(([key, child]) =>
-						fieldsFrom(child, `${path}.${index}.${key}`, `Item ${index + 1} — ${labelFor(key)}`)
+						fieldsFrom(child, `${path}.${index}.${key}`, `${label} → ${labelFor(key)}`)
 					);
 				}
 				return [];
@@ -134,29 +408,32 @@
 	}
 
 	function buildSections(page: PageContent[PageKey]): Section[] {
-		const copy: Field[] = [];
-		const images: Field[] = [];
-		const groups: Section[] = [];
+		const values = page as unknown as Record<string, unknown>;
+		return sectionDefinitions[selectedPage]
+			.map(({ keys, ...section }) => ({
+				...section,
+				fields: keys.flatMap((key) => fieldsFrom(values[key], key, labelFor(key)))
+			}))
+			.filter((section) => section.fields.length);
+	}
 
-		for (const [key, value] of Object.entries(page)) {
-			if (key === 'navigation') continue;
-			if (selectedPage === 'photography' && key === 'categories') continue;
-			if (Array.isArray(value)) {
-				groups.push({ title: labelFor(key), fields: fieldsFrom(value, key) });
-			} else if (isMedia(value)) {
-				images.push(...fieldsFrom(value, key, labelFor(key)));
-			} else if (value && typeof value === 'object') {
-				groups.push({ title: labelFor(key), fields: fieldsFrom(value, key) });
-			} else {
-				copy.push(...fieldsFrom(value, key, labelFor(key)));
-			}
-		}
-
-		return [
-			...(copy.length ? [{ title: 'Page copy', fields: copy }] : []),
-			...(images.length ? [{ title: 'Images', fields: images }] : []),
-			...groups.filter((group) => group.fields.length)
-		];
+	function filterSections(source: Section[], query: string) {
+		const normalized = query.trim().toLowerCase();
+		if (!normalized) return source;
+		return source
+			.map((section) => ({
+				...section,
+				fields: section.fields.filter((field) => {
+					const value =
+						field.kind === 'text'
+							? field.value
+							: `${field.value.alt} ${field.value.caption ?? ''} ${field.value.src}`;
+					return `${section.title} ${section.location} ${section.description} ${field.label} ${field.path} ${value}`
+						.toLowerCase()
+						.includes(normalized);
+				})
+			}))
+			.filter((section) => section.fields.length);
 	}
 
 	function collectUsedImages(content: PageContent) {
@@ -573,7 +850,77 @@
 		}
 	}
 
-	onMount(loadArchive);
+	function defaultSectionFor(page: PageKey) {
+		return sectionDefinitions[page].find((section) => !section.id.endsWith('.seo'))?.id ?? '';
+	}
+
+	function choosePage(page: PageKey) {
+		selectedPage = page;
+		selectedSection = defaultSectionFor(page);
+		showArchive = false;
+		contentSearch = '';
+		notice = '';
+	}
+
+	function postToPreview(message: Record<string, unknown>) {
+		previewFrame?.contentWindow?.postMessage(message, window.location.origin);
+	}
+
+	function syncPreview() {
+		postToPreview({
+			type: 'ashleigh:preview-content',
+			content: structuredClone($state.snapshot(draft))
+		});
+		postToPreview({
+			type: 'ashleigh:preview-inspect',
+			enabled: previewInspect
+		});
+		if (selectedSection) {
+			postToPreview({
+				type: 'ashleigh:preview-focus',
+				sectionId: selectedSection
+			});
+		}
+	}
+
+	function selectEditorSection(sectionId: string, scroll = false) {
+		selectedSection = sectionId;
+		postToPreview({ type: 'ashleigh:preview-focus', sectionId });
+		if (!scroll) return;
+		setTimeout(() => {
+			const editor = document.querySelector<HTMLDetailsElement>(
+				`[data-editor-section="${sectionId}"]`
+			);
+			if (!editor) return;
+			editor.open = true;
+			editor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		});
+	}
+
+	onMount(() => {
+		void loadArchive();
+		function receivePreviewMessage(event: MessageEvent) {
+			if (
+				event.origin !== window.location.origin ||
+				event.source !== previewFrame?.contentWindow
+			) {
+				return;
+			}
+			if (event.data?.type === 'ashleigh:preview-ready') syncPreview();
+			if (event.data?.type === 'ashleigh:preview-section') {
+				selectEditorSection(String(event.data.sectionId ?? ''), true);
+			}
+		}
+		window.addEventListener('message', receivePreviewMessage);
+		return () => window.removeEventListener('message', receivePreviewMessage);
+	});
+
+	$effect(() => {
+		$state.snapshot(draft);
+		selectedSection;
+		previewInspect;
+		if (previewFrame) syncPreview();
+	});
 
 	function setPath(path: string, value: unknown) {
 		const next = structuredClone($state.snapshot(draft));
@@ -659,22 +1006,34 @@
 
 <svelte:head><title>Content - Website Studio</title></svelte:head>
 
-<div class="mx-auto max-w-7xl">
+<div
+	class="content-editor-shell mx-auto max-w-7xl"
+	class:editor-with-preview={previewOpen && !showArchive}
+>
 	<div class="flex flex-wrap items-end justify-between gap-4">
 		<div>
 			<h1 class="font-display text-5xl">Content</h1>
 			<p class="mt-3 max-w-2xl text-muted">
-				Update every page or manage the complete Cloudflare image archive. Layout and styling stay fixed.
+				Choose a page and section, edit it, then confirm the result in the live preview.
 			</p>
 		</div>
 		{#if !showArchive}
-			<a
-				href={currentPage.href}
-				target="_blank"
-				class="rounded-full border border-line bg-paper px-5 py-3 text-sm hover:border-ink"
-			>
-				View {currentPage.label} page ↗
-			</a>
+			<div class="flex flex-wrap gap-2">
+				<button
+					type="button"
+					onclick={() => (previewOpen = !previewOpen)}
+					class="rounded-full border border-line bg-paper px-5 py-3 text-sm hover:border-ink"
+				>
+					{previewOpen ? 'Hide live preview' : 'Show live preview'}
+				</button>
+				<a
+					href={currentPage.href}
+					target="_blank"
+					class="rounded-full border border-line bg-paper px-5 py-3 text-sm hover:border-ink"
+				>
+					Open page ↗
+				</a>
+			</div>
 		{/if}
 	</div>
 
@@ -683,11 +1042,7 @@
 			{#each pages as item}
 				<button
 					type="button"
-					onclick={() => {
-						selectedPage = item.id;
-						showArchive = false;
-						notice = '';
-					}}
+					onclick={() => choosePage(item.id)}
 					class="rounded-full px-5 py-2.5 text-sm transition-colors {!showArchive &&
 					selectedPage === item.id
 						? 'bg-ink text-paper'
@@ -711,26 +1066,44 @@
 		</div>
 	</div>
 
+	{#if !showArchive}
+		<div class="mt-5 flex flex-wrap items-center gap-3 rounded-3xl border border-line bg-paper p-3">
+			<label class="relative min-w-64 flex-1">
+				<span class="sr-only">Search {currentPage.label} content</span>
+				<input
+					type="search"
+					bind:value={contentSearch}
+					placeholder="Search headings, images, captions, or sections…"
+					class="w-full rounded-2xl bg-mist px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-coral/30"
+				/>
+			</label>
+			<span class="rounded-full bg-mist px-4 py-2 text-xs text-muted">
+				{visibleSections.length} {visibleSections.length === 1 ? 'section' : 'sections'}
+			</span>
+			<span class="rounded-full bg-mint px-4 py-2 text-xs text-teal">
+				{currentPage.label} page
+			</span>
+		</div>
+	{/if}
+
 	{#if notice}
 		<p class="mt-5 rounded-2xl bg-mint px-5 py-3 text-sm text-teal">{notice}</p>
 	{/if}
 
 	{#if !showArchive && selectedPage === 'photography'}
-		<section class="mt-6 overflow-hidden rounded-[2rem] border border-line bg-paper">
+		<section
+			class="mt-6 overflow-hidden rounded-[2rem] border border-line bg-paper"
+			data-editor-section="photography.filters"
+			onfocusin={() => selectEditorSection('photography.filters')}
+		>
 			<div class="flex flex-wrap items-center justify-between gap-4 border-b border-line px-6 py-5 md:px-8">
 				<div>
+					<span class="rounded-full bg-mint px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-teal">Photography → Filters</span>
 					<h2 class="font-display text-3xl">Photography filters</h2>
 					<p class="mt-1 text-sm text-muted">
 						Add, rename, or remove the filters visitors use on the photography page.
 					</p>
 				</div>
-				<button
-					type="button"
-					onclick={addPhotographyShot}
-					class="rounded-full bg-coral px-5 py-3 text-xs font-semibold text-paper"
-				>
-					Add photograph
-				</button>
 			</div>
 			<div class="p-6 md:p-8">
 				<div class="flex flex-wrap gap-3">
@@ -775,24 +1148,6 @@
 					</button>
 				</div>
 			</div>
-		</section>
-	{/if}
-
-	{#if !showArchive && selectedPage === 'social'}
-		<section class="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-line bg-paper px-6 py-5 md:px-8">
-			<div>
-				<h2 class="font-display text-3xl">Social reels</h2>
-				<p class="mt-1 text-sm text-muted">
-					Add as many image or video reels as you need. The public page reveals them ten at a time.
-				</p>
-			</div>
-			<button
-				type="button"
-				onclick={addSocialReel}
-				class="rounded-full bg-teal px-5 py-3 text-xs font-semibold text-paper"
-			>
-				Add reel
-			</button>
 		</section>
 	{/if}
 
@@ -1013,19 +1368,69 @@
 		</div>
 	{:else}
 		<div class="mt-6 space-y-5">
-			{#each sections as section (section.title)}
-				<details class="group overflow-hidden rounded-[2rem] border border-line bg-paper" open>
-					<summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 md:px-8">
+			{#each visibleSections as section (section.id)}
+				<details
+					class="group scroll-mt-24 overflow-hidden rounded-[2rem] border bg-paper {selectedSection === section.id ? 'border-coral' : 'border-line'}"
+					data-editor-section={section.id}
+					open={Boolean(contentSearch) || section.id === defaultSectionFor(selectedPage)}
+				>
+					<summary
+						class="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 md:px-8"
+						onclick={() => selectEditorSection(section.id)}
+					>
 						<div>
+							<span class="rounded-full bg-mint px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-teal">{section.location}</span>
 							<h2 class="font-display text-2xl">{section.title}</h2>
-							<p class="mt-1 text-xs text-muted">{section.fields.length} editable {section.fields.length === 1 ? 'field' : 'fields'}</p>
+							<p class="mt-1 max-w-2xl text-xs leading-relaxed text-muted">{section.description}</p>
+							<p class="mt-2 text-[10px] uppercase tracking-wide text-muted">{section.fields.length} editable {section.fields.length === 1 ? 'field' : 'fields'}</p>
 						</div>
 						<span class="text-xl text-muted transition-transform group-open:rotate-45">+</span>
 					</summary>
 					<div class="grid gap-5 border-t border-line p-6 md:grid-cols-2 md:p-8">
+						{#if section.id === 'photography.gallery'}
+							<div class="flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-blush p-5 md:col-span-2">
+								<div>
+									<p class="text-sm font-semibold">Photography collection</p>
+									<p class="mt-1 text-xs text-muted">Add a new slot directly to this gallery section.</p>
+								</div>
+								<button
+									type="button"
+									onclick={addPhotographyShot}
+									class="rounded-full bg-coral px-5 py-3 text-xs font-semibold text-paper"
+								>
+									Add photograph
+								</button>
+							</div>
+						{:else if section.id === 'social.reels'}
+							<div class="flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-mint p-5 md:col-span-2">
+								<div>
+									<p class="text-sm font-semibold">Social reel collection</p>
+									<p class="mt-1 text-xs text-muted">Add an image or video slot directly to this reels section.</p>
+								</div>
+								<button
+									type="button"
+									onclick={addSocialReel}
+									class="rounded-full bg-teal px-5 py-3 text-xs font-semibold text-paper"
+								>
+									Add reel
+								</button>
+							</div>
+						{/if}
 						{#each section.fields as field (field.path)}
 							{#if field.kind === 'media'}
 								<div class="rounded-3xl bg-mist p-4 md:col-span-2">
+									<div class="mb-4 flex flex-wrap items-center gap-2">
+										<span class="rounded-full bg-paper px-3 py-1 text-[10px] font-semibold text-muted">{section.location} → {field.label}</span>
+										<span class="rounded-full bg-paper px-3 py-1 text-[10px] text-muted">
+											{field.value.mediaType === 'video' ? 'Video' : 'Image'}
+										</span>
+										{#if field.value.rotation?.length}
+											<span class="rounded-full bg-lilac px-3 py-1 text-[10px] text-violet">{field.value.rotation.length + 1} rotating images</span>
+										{/if}
+										{#if field.value.metadata?.setName}
+											<span class="rounded-full bg-mint px-3 py-1 text-[10px] text-teal">{field.value.metadata.setName}</span>
+										{/if}
+									</div>
 									{#if (selectedPage === 'photography' && field.path.startsWith('shots.')) ||
 										(selectedPage === 'social' && field.path.startsWith('reels.'))}
 										<div class="mb-4 flex items-center justify-between gap-3">
@@ -1257,6 +1662,7 @@
 							{:else}
 								<label class="block {field.multiline ? 'md:col-span-2' : ''}">
 									<span class="text-xs font-semibold">{field.label}</span>
+									<span class="mt-1 block text-[10px] text-muted">{section.location} → {field.label}</span>
 									{#if field.multiline}
 										<textarea
 											value={field.value}
@@ -1276,12 +1682,72 @@
 						{/each}
 					</div>
 				</details>
+			{:else}
+				<div class="rounded-[2rem] border border-dashed border-line bg-paper p-12 text-center">
+					<p class="font-display text-2xl">No matching content</p>
+					<p class="mt-2 text-sm text-muted">Try a different heading, caption, image, or section name.</p>
+				</div>
 			{/each}
 		</div>
 	{/if}
 
+	{#if previewOpen && !showArchive}
+		<aside class="preview-panel fixed bottom-0 right-0 top-18 z-40 flex flex-col border-l border-line bg-paper shadow-2xl max-lg:left-4 max-lg:right-4 max-lg:top-16 max-lg:rounded-t-3xl max-lg:border">
+			<div class="border-b border-line px-4 py-3">
+				<div class="flex items-center justify-between gap-3">
+					<div>
+						<p class="text-xs font-semibold">Live {currentPage.label} preview</p>
+						<p class="mt-0.5 text-[10px] text-muted">Unsaved edits appear here automatically.</p>
+					</div>
+					<button
+						type="button"
+						onclick={() => (previewOpen = false)}
+						class="rounded-full border border-line px-3 py-2 text-xs text-muted hover:bg-mist hover:text-ink"
+					>
+						Close
+					</button>
+				</div>
+				<div class="mt-3 flex flex-wrap items-center gap-2">
+					<div class="flex rounded-full bg-mist p-1">
+						{#each ['desktop', 'tablet', 'mobile'] as device}
+							<button
+								type="button"
+								onclick={() => (previewDevice = device as typeof previewDevice)}
+								class="rounded-full px-3 py-1.5 text-[10px] capitalize {previewDevice === device ? 'bg-ink text-paper' : 'text-muted'}"
+							>
+								{device}
+							</button>
+						{/each}
+					</div>
+					<button
+						type="button"
+						onclick={() => (previewInspect = !previewInspect)}
+						class="rounded-full px-3 py-2 text-[10px] {previewInspect ? 'bg-coral text-paper' : 'border border-line text-muted'}"
+					>
+						{previewInspect ? 'Section inspector on' : 'Section inspector off'}
+					</button>
+				</div>
+			</div>
+			<div class="min-h-0 flex-1 overflow-auto bg-mist p-3">
+				<div
+					class="mx-auto h-full overflow-hidden rounded-2xl border border-line bg-paper transition-[width] duration-200"
+					style:width={previewDevice === 'mobile' ? '390px' : previewDevice === 'tablet' ? '768px' : '100%'}
+					style:max-width="100%"
+				>
+					<iframe
+						bind:this={previewFrame}
+						src={`${currentPage.href}?builder=1`}
+						title="Live preview of the {currentPage.label} page"
+						onload={syncPreview}
+						class="h-full min-h-[640px] w-full bg-paper"
+					></iframe>
+				</div>
+			</div>
+		</aside>
+	{/if}
+
 	{#if showSaveBar}
-		<div class="sticky bottom-5 mt-7 flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-ink px-6 py-4 text-paper shadow-xl">
+		<div class="sticky bottom-5 z-50 mt-7 flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-ink px-6 py-4 text-paper shadow-xl">
 			<p class="text-xs text-paper/60">
 				{saveState === 'saved'
 					? 'Your changes are live.'
@@ -1328,6 +1794,16 @@
 </div>
 
 <style>
+	@media (min-width: 1024px) {
+		.editor-with-preview {
+			margin-right: min(47vw, 780px);
+		}
+
+		.preview-panel {
+			width: min(47vw, 780px);
+		}
+	}
+
 	.save-feedback {
 		transition:
 			background-color 180ms ease,

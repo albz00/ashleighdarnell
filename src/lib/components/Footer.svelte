@@ -30,7 +30,7 @@
 </script>
 
 <Wave fill="ink" class="relative -mt-4 md:-mt-5" />
-<footer class="bg-ink text-paper">
+<footer class="bg-ink text-paper" data-content-section="global.footer" data-content-label="Global → Footer">
 	<div class="mx-auto grid max-w-6xl gap-12 px-5 pt-16 pb-14 md:grid-cols-2 md:px-8 lg:grid-cols-[1.5fr_0.8fr_1.2fr]">
 		<div class="max-w-md">
 			<a href="/" class="inline-flex items-baseline gap-2" aria-label="{global.firstName} {global.lastName}, home">

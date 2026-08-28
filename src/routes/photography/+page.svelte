@@ -42,6 +42,8 @@
 
 <section
 	class="backdrop-forest relative bg-paper"
+	data-content-section="photography.hero"
+	data-content-label="Photography → Hero"
 	style:--managed-bg={'url("' + photography.background.src + '")'}
 	use:rotateMedia={{ media: photography.background, background: true }}
 >
@@ -66,7 +68,7 @@
 	{/if}
 </section>
 
-<section class="sticky top-[100px] z-40 border-y border-line bg-paper/90 backdrop-blur md:top-[120px]">
+<section class="sticky top-[100px] z-40 border-y border-line bg-paper/90 backdrop-blur md:top-[120px]" data-content-section="photography.filters" data-content-label="Photography → Filters">
 	<div class="mx-auto flex max-w-6xl gap-2 overflow-x-auto px-5 py-3 md:px-8">
 		{#each photography.categories as category (category)}
 			<button
@@ -85,12 +87,22 @@
 	</div>
 </section>
 
-<section class="mx-auto max-w-6xl px-5 py-12 md:px-8 md:py-16">
+<section class="mx-auto max-w-6xl px-5 py-12 md:px-8 md:py-16" data-content-section="photography.gallery" data-content-label="Photography → Gallery">
 	<div class="columns-1 gap-6 sm:columns-2 lg:columns-3 [&>*]:mb-6">
 		{#each shots as shot, i (shot.src)}
 			<Reveal delay={(i % 3) * 70} class="break-inside-avoid">
 				<div class="page-polaroid group">
-					<Placeholder label={shot.caption || `photo ${i + 1}`} src={shot.src} alt={shot.alt} rotation={shot.rotation} rotationSeconds={shot.rotationSeconds} ratio={shot.ratio} tint={shot.tint} class="outline-frame" />
+					<Placeholder
+						label={shot.caption || `photo ${i + 1}`}
+						src={shot.src}
+						alt={shot.alt}
+						rotation={shot.rotation}
+						rotationSeconds={shot.rotationSeconds}
+						builderInfo={`Filters: ${photoFilters(shot, photography.categories).join(', ') || 'None'}`}
+						ratio={shot.ratio}
+						tint={shot.tint}
+						class="outline-frame"
+					/>
 					<p class="page-polaroid-caption">{shot.caption}</p>
 				</div>
 			</Reveal>
@@ -113,7 +125,7 @@
 
 <div>
 	<Wave fill="blush" size="lg" class="bg-paper" />
-	<section class="bg-blush">
+	<section class="bg-blush" data-content-section="photography.cta" data-content-label="Photography → Contact callout">
 		<div
 			class="mx-auto flex max-w-6xl flex-col items-start gap-8 px-5 pt-10 pb-24 md:flex-row md:items-center md:justify-between md:px-8 md:pt-14 md:pb-28"
 		>

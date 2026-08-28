@@ -9,7 +9,7 @@
 	<title>{contact.seoTitle}</title>
 </svelte:head>
 
-<section class="bg-paper">
+<section class="bg-paper" data-content-section="contact.main" data-content-label="Contact → Page & form">
 	<div
 		class="mx-auto grid max-w-6xl gap-16 px-5 pt-20 pb-24 md:grid-cols-[0.9fr_1.1fr] md:px-8 md:pt-28 md:pb-32"
 	>
@@ -30,7 +30,12 @@
 		</Reveal>
 
 		<Reveal delay={120}>
-			<form class="space-y-6 rounded-[2.5rem] bg-mist p-6 md:p-8" onsubmit={(e) => e.preventDefault()}>
+			<form
+				class="space-y-6 rounded-[2.5rem] bg-mist p-6 md:p-8"
+				data-content-section="contact.form"
+				data-content-label="Contact → Inquiry form"
+				onsubmit={(e) => e.preventDefault()}
+			>
 				<div class="grid gap-6 sm:grid-cols-2">
 					<label class="block">
 						<span class="text-[11px] uppercase tracking-[0.2em] text-muted">{contact.nameLabel}</span>

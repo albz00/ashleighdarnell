@@ -17,7 +17,7 @@
 	const isActive = (href: string) => page.url.pathname.startsWith(href);
 </script>
 
-<header class="sticky top-0 z-50">
+<header class="sticky top-0 z-50" data-content-section="global.header" data-content-label="Global → Header">
 	<div class="grid h-1 grid-cols-4" aria-hidden="true">
 		<span class="bg-coral"></span>
 		<span class="bg-marigold"></span>

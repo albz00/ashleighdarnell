@@ -37,6 +37,8 @@
 
 <section
 	class="backdrop-forest relative bg-paper"
+	data-content-section="about.hero"
+	data-content-label="About → Hero"
 	style:--managed-bg={'url("' + about.background.src + '")'}
 	use:rotateMedia={{ media: about.background, background: true }}
 >
@@ -70,7 +72,7 @@
 </section>
 
 <Wave fill="mist" size="lg" class="bg-paper" />
-<section class="bg-mist">
+<section class="bg-mist" data-content-section="about.story" data-content-label="About → Story & facts">
 	<div class="mx-auto max-w-6xl px-5 pt-10 pb-20 md:px-8 md:pt-14 md:pb-28">
 		<div class="grid gap-6 md:grid-cols-[0.7fr_1.3fr] md:items-end">
 			<Reveal>
@@ -121,7 +123,7 @@
 </section>
 
 <Wave fill="violet" size="lg" class="bg-mist" />
-<section class="bg-violet text-paper">
+<section class="bg-violet text-paper" data-content-section="about.cta" data-content-label="About → Contact callout">
 	<div class="mx-auto max-w-6xl px-5 pt-10 pb-24 text-center md:px-8 md:pt-14 md:pb-32">
 		<Reveal>
 			<h2 class="page-section-title font-display mx-auto max-w-3xl">
