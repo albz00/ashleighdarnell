@@ -1,14 +1,16 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { pageContent } from '$lib/content/page-content';
+	import { siteNavigation } from '$lib/content/navigation';
 	import { slide } from 'svelte/transition';
 	import WavyEdge from './WavyEdge.svelte';
 
 	const colors = ['nav-coral', 'nav-teal', 'nav-blog', 'nav-marigold', 'nav-violet'];
 	const global = $derived($pageContent.global);
-	const links = $derived(
-		global.navigation.map((link, index) => ({ ...link, color: colors[index] ?? 'nav-coral' }))
-	);
+	const links = siteNavigation.map((link, index) => ({
+		...link,
+		color: colors[index] ?? 'nav-coral'
+	}));
 
 	let menuOpen = $state(false);
 

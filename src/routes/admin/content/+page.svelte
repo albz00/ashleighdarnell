@@ -65,6 +65,10 @@
 			: archive.filter((image) => (image.meta?.setName || 'Unsorted') === setFilter)
 	);
 	const usedImages = $derived(collectUsedImages(draft));
+	const hasUnsavedChanges = $derived(
+		JSON.stringify(draft) !== JSON.stringify($pageContent)
+	);
+	const showSaveBar = $derived(hasUnsavedChanges || saveState !== 'idle');
 
 	function labelFor(key: string) {
 		return key
@@ -129,6 +133,7 @@
 		const groups: Section[] = [];
 
 		for (const [key, value] of Object.entries(page)) {
+			if (key === 'navigation') continue;
 			if (Array.isArray(value)) {
 				groups.push({ title: labelFor(key), fields: fieldsFrom(value, key) });
 			} else if (isMedia(value)) {
@@ -330,6 +335,7 @@
 			assignPath(next, slot.page, slot.path, archiveUrl(selected[index % selected.length]))
 		);
 		draft = next;
+		saveState = 'idle';
 		notice = `${slots.length} image ${slots.length === 1 ? 'slot is' : 'slots are'} previewing the selected set. Save changes to publish.`;
 	}
 
@@ -361,6 +367,7 @@
 		}
 		target[keys.at(-1) ?? ''] = value;
 		draft = next;
+		saveState = 'idle';
 		notice = '';
 	}
 
@@ -378,6 +385,7 @@
 		media.rotation = [...(media.rotation ?? []), ''];
 		media.rotationSeconds ??= 8;
 		draft = next;
+		saveState = 'idle';
 		notice = '';
 	}
 
@@ -830,51 +838,58 @@
 		</div>
 	{/if}
 
-	<div class="sticky bottom-5 mt-7 flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-ink px-6 py-4 text-paper shadow-xl">
-		<p class="text-xs text-paper/60">Image replacements go live only after they are saved.</p>
-		<div class="flex gap-2">
-			{#if !showArchive}
-				<button type="button" onclick={resetCurrentPage} class="rounded-full px-5 py-2.5 text-xs text-paper/65 hover:bg-paper/10">
-					Reset page
+	{#if showSaveBar}
+		<div class="sticky bottom-5 mt-7 flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-ink px-6 py-4 text-paper shadow-xl">
+			<p class="text-xs text-paper/60">
+				{saveState === 'saved'
+					? 'Your changes are live.'
+					: saveState === 'saving'
+						? 'Sending changes to the server…'
+						: 'You have unsaved content changes.'}
+			</p>
+			<div class="flex gap-2">
+				{#if !showArchive}
+					<button type="button" onclick={resetCurrentPage} class="rounded-full px-5 py-2.5 text-xs text-paper/65 hover:bg-paper/10">
+						Reset page
+					</button>
+				{/if}
+				<button
+					type="button"
+					onclick={discardChanges}
+					disabled={saveState === 'saving'}
+					class="rounded-full border border-paper/20 px-5 py-2.5 text-xs text-paper/75 transition-colors hover:bg-paper/10 disabled:opacity-50"
+				>
+					Discard changes
 				</button>
-			{/if}
-			<button
-				type="button"
-				onclick={discardChanges}
-				disabled={saveState === 'saving'}
-				class="rounded-full border border-paper/20 px-5 py-2.5 text-xs text-paper/75 transition-colors hover:bg-paper/10 disabled:opacity-50"
-			>
-				Discard changes
-			</button>
-			<button
-				type="button"
-				onclick={save}
-				disabled={saveState === 'saving'}
-				class="save-feedback rounded-full px-6 py-2.5 text-xs font-semibold text-paper disabled:cursor-wait {saveState ===
-				'saved'
-					? 'saved-pop bg-teal'
-					: saveState === 'error'
-						? 'bg-violet'
-						: 'bg-coral'}"
-			>
-				{saveState === 'saving'
-					? 'Saving…'
-					: saveState === 'saved'
-						? 'Saved ✓'
+				<button
+					type="button"
+					onclick={save}
+					disabled={saveState === 'saving'}
+					class="save-feedback rounded-full px-6 py-2.5 text-xs font-semibold text-paper disabled:cursor-wait {saveState ===
+					'saved'
+						? 'saved-pop bg-teal'
 						: saveState === 'error'
-							? 'Try saving again'
-							: 'Save content changes'}
-			</button>
+							? 'bg-violet'
+							: 'bg-coral'}"
+				>
+					{saveState === 'saving'
+						? 'Saving…'
+						: saveState === 'saved'
+							? 'Saved ✓'
+							: saveState === 'error'
+								? 'Try saving again'
+								: 'Save content changes'}
+				</button>
+			</div>
 		</div>
-	</div>
+	{/if}
 </div>
 
 <style>
 	.save-feedback {
 		transition:
 			background-color 180ms ease,
-			transform 180ms ease,
-			box-shadow 180ms ease;
+			transform 180ms ease;
 	}
 
 	.saved-pop {
@@ -884,15 +899,12 @@
 	@keyframes saved-pop {
 		0% {
 			transform: scale(1);
-			box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-teal) 65%, transparent);
 		}
 		45% {
 			transform: scale(1.08);
-			box-shadow: 0 0 0 10px transparent;
 		}
 		100% {
 			transform: scale(1);
-			box-shadow: 0 0 0 0 transparent;
 		}
 	}
 

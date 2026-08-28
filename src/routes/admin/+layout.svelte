@@ -39,10 +39,10 @@
 		</div>
 	</div>
 {:else if $authState.user}
-	<div class="min-h-screen bg-mist lg:grid lg:grid-cols-[17rem_1fr]">
+	<div class="admin-shell min-h-screen bg-mist lg:grid lg:grid-cols-[17rem_1fr]">
 		{#if mobileOpen}
 			<button
-				class="fixed inset-0 z-30 bg-ink/30 lg:hidden"
+				class="admin-no-feedback fixed inset-0 z-30 bg-ink/30 lg:hidden"
 				aria-label="Close navigation"
 				onclick={() => (mobileOpen = false)}
 			></button>
@@ -108,3 +108,39 @@
 		<!-- Redirecting unauthenticated visitors to the login route. -->
 	</div>
 {/if}
+
+<style>
+	:global(.admin-shell button) {
+		transition:
+			filter 150ms ease,
+			background-color 150ms ease,
+			border-color 150ms ease,
+			color 150ms ease;
+	}
+
+	@media (hover: hover) {
+		:global(.admin-shell button:not(:disabled):not(.admin-no-feedback):hover) {
+			filter: brightness(0.9) saturate(1.08);
+		}
+	}
+
+	:global(.admin-shell button:not(:disabled):not(.admin-no-feedback):active) {
+		filter: brightness(0.82) saturate(1.25);
+		transition-duration: 70ms;
+	}
+
+	:global(.admin-shell button:focus-visible) {
+		outline: 3px solid color-mix(in srgb, var(--color-coral) 65%, transparent);
+		outline-offset: 3px;
+	}
+
+	:global(.admin-shell button:disabled) {
+		cursor: not-allowed;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		:global(.admin-shell button) {
+			transition: none;
+		}
+	}
+</style>

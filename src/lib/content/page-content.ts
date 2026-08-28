@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
 import { writable, type Writable } from 'svelte/store';
+import { siteNavigation } from './navigation';
 
 export type MediaContent = {
 	src: string;
@@ -154,13 +155,7 @@ export const defaultPageContent: PageContent = {
 		firstName: 'Ashleigh',
 		lastName: 'Darnell',
 		homeLabel: 'Home',
-		navigation: [
-			{ href: '/photography', label: 'Photography' },
-			{ href: '/social', label: 'Social Media' },
-			{ href: '/blog', label: 'Blog' },
-			{ href: '/about', label: 'About' },
-			{ href: '/contact', label: 'Contact' }
-		],
+		navigation: [...siteNavigation],
 		footerTagline:
 			'Photography and creative storytelling from Nashville, Tennessee, with roots in West Virginia.',
 		footerCtaLabel: 'Work with me',

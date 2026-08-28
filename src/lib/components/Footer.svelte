@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { pageContent } from '$lib/content/page-content';
+	import { siteNavigation } from '$lib/content/navigation';
 	import { subscribeToNewsletter } from '$lib/firebase/repository';
 	import Wave from './Wave.svelte';
 
@@ -51,7 +52,7 @@
 			<p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-paper/45">{global.footerExploreTitle}</p>
 			<ul class="mt-5 space-y-3 text-sm">
 				<li><a href="/" class="transition-colors hover:text-coral">{global.homeLabel}</a></li>
-				{#each global.navigation as link}
+				{#each siteNavigation as link}
 					<li><a href={link.href} class="transition-colors hover:text-coral">{link.label}</a></li>
 				{/each}
 			</ul>
