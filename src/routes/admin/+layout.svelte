@@ -2,12 +2,18 @@
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { signOut } from 'firebase/auth';
+	import { getIdToken, signOut, type User } from 'firebase/auth';
+	import { onMount } from 'svelte';
 	import { auth, authState } from '$lib/firebase/client';
 	import { firebaseConnection } from '$lib/firebase/repository';
 
 	let { children } = $props();
 	let mobileOpen = $state(false);
+	let sessionId = $state('');
+	let sessionToken = '';
+	let trackedUid = '';
+	let sessionActive = $state(false);
+	let sessionError = $state('');
 
 	const isLogin = $derived(page.url.pathname === '/admin/login');
 	const links = [
@@ -32,7 +38,70 @@
 		}
 	});
 
+	async function sessionRequest(action: 'start' | 'touch' | 'end', keepalive = false) {
+		if (!auth?.currentUser || !sessionId) return;
+		const token = keepalive ? sessionToken : await getIdToken(auth.currentUser);
+		if (!token) return;
+		sessionToken = token;
+		const response = await fetch('/api/admin/sessions', {
+			method: 'POST',
+			keepalive,
+			headers: {
+				authorization: `Bearer ${token}`,
+				'content-type': 'application/json'
+			},
+			body: JSON.stringify({
+				action,
+				sessionId,
+				path: page.url.pathname
+			})
+		});
+		if (!response.ok) throw new Error('Session activity could not be recorded.');
+	}
+
+	async function startSession(user: User) {
+		trackedUid = user.uid;
+		sessionId = `admin-${crypto.randomUUID()}`;
+		sessionActive = false;
+		sessionError = '';
+		try {
+			await sessionRequest('start');
+			sessionActive = true;
+		} catch (error) {
+			sessionError = error instanceof Error ? error.message : 'Session logging is unavailable.';
+		}
+	}
+
+	$effect(() => {
+		const user = $authState.user;
+		if (browser && user && trackedUid !== user.uid) void startSession(user);
+	});
+
+	$effect(() => {
+		page.url.pathname;
+		if (browser && sessionActive) void sessionRequest('touch').catch(() => {});
+	});
+
+	onMount(() => {
+		const heartbeat = window.setInterval(() => {
+			if (sessionActive) void sessionRequest('touch').catch(() => {});
+		}, 5 * 60 * 1000);
+		const endSession = () => {
+			if (sessionActive) void sessionRequest('end', true).catch(() => {});
+		};
+		window.addEventListener('pagehide', endSession);
+		return () => {
+			window.clearInterval(heartbeat);
+			window.removeEventListener('pagehide', endSession);
+			endSession();
+		};
+	});
+
 	async function logout() {
+		if (sessionActive) {
+			await sessionRequest('end').catch(() => {});
+			sessionActive = false;
+		}
 		if (auth) await signOut(auth);
 		await goto('/admin/login');
 	}
@@ -125,12 +194,44 @@
 					onclick={() => (mobileOpen = true)}
 					aria-label="Open navigation"
 				>☰</button>
-				<div class="ml-auto flex items-center gap-3">
-					<div class="text-right">
-						<p class="max-w-52 truncate text-sm font-semibold">{$authState.user.email}</p>
+				<details class="group relative ml-auto">
+					<summary class="flex cursor-pointer list-none items-center gap-3 rounded-full">
+						<p class="max-w-52 truncate text-sm font-semibold">
+							{$authState.user.displayName || $authState.user.email || 'Administrator'}
+						</p>
+						<span class="profile-avatar-shell">
+							{#if $authState.user.photoURL}
+								<img
+									src={$authState.user.photoURL}
+									alt={$authState.user.displayName || 'Administrator'}
+									referrerpolicy="no-referrer"
+									class="h-10 w-10 rounded-full border-2 border-paper object-cover shadow-sm"
+								/>
+							{:else}
+								<span class="grid h-10 w-10 place-items-center rounded-full bg-coral font-display text-paper">
+									{($authState.user.displayName || $authState.user.email || 'A').charAt(0).toUpperCase()}
+								</span>
+							{/if}
+							<span class="profile-orbit" aria-hidden="true"></span>
+						</span>
+					</summary>
+					<div class="absolute right-0 top-full z-30 mt-3 w-72 rounded-2xl border border-line bg-paper p-5 shadow-xl">
+						<p class="text-xs text-muted">Signed in as</p>
+						<p class="mt-1 break-all text-sm font-semibold">{$authState.user.email}</p>
+						<div class="mt-4 border-t border-line pt-3">
+							<a
+								href="/admin/sessions"
+								class="group/session flex items-center justify-between gap-3 rounded-xl p-3 text-sm font-semibold transition-all hover:bg-mist hover:text-coral"
+							>
+								<span class="flex items-center gap-2">
+									<span class="h-2.5 w-2.5 rounded-full transition-transform group-hover/session:scale-125 {sessionActive ? 'bg-teal' : sessionError ? 'bg-coral' : 'bg-marigold'}"></span>
+									Session logs
+								</span>
+								<span class="transition-transform group-hover/session:translate-x-1" aria-hidden="true">→</span>
+							</a>
+						</div>
 					</div>
-					<div class="grid h-10 w-10 place-items-center rounded-full bg-coral font-display text-paper">A</div>
-				</div>
+				</details>
 			</header>
 			{#if $firebaseConnection.error}
 				<p class="mx-5 mt-5 rounded-2xl bg-blush px-5 py-3 text-sm text-coral md:mx-8">
@@ -152,6 +253,81 @@
 {/if}
 
 <style>
+	.profile-avatar-shell {
+		position: relative;
+		display: inline-grid;
+		flex: none;
+		place-items: center;
+	}
+
+	.profile-orbit {
+		position: absolute;
+		inset: -3px;
+		border: 2px dashed var(--color-coral);
+		border-radius: 999px;
+		pointer-events: none;
+		animation: profile-orbit 4s linear infinite;
+	}
+
+	.profile-orbit::after {
+		position: absolute;
+		top: -3px;
+		left: 50%;
+		width: 6px;
+		height: 6px;
+		border: 1px solid var(--color-paper);
+		border-radius: 999px;
+		background: var(--color-marigold);
+		content: '';
+		transform: translateX(-50%);
+	}
+
+	summary:hover .profile-orbit {
+		border-color: var(--color-teal);
+		animation: profile-orbit-hover 700ms ease-in-out infinite alternate;
+	}
+
+	details[open] .profile-orbit {
+		border-style: solid;
+		border-color: var(--color-violet);
+		animation: profile-orbit-open 900ms cubic-bezier(0.45, 0, 0.55, 1) infinite;
+	}
+
+	@keyframes profile-orbit {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	@keyframes profile-orbit-hover {
+		from {
+			transform: rotate(0deg) scale(1);
+		}
+		to {
+			transform: rotate(-210deg) scale(1.12);
+		}
+	}
+
+	@keyframes profile-orbit-open {
+		0%,
+		100% {
+			transform: rotate(0deg) scale(1);
+			opacity: 1;
+		}
+		50% {
+			transform: rotate(180deg) scale(1.18);
+			opacity: 0.55;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.profile-orbit,
+		summary:hover .profile-orbit,
+		details[open] .profile-orbit {
+			animation: none;
+		}
+	}
+
 	:global(.admin-shell button) {
 		transition:
 			filter 150ms ease,

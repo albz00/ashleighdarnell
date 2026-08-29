@@ -36,6 +36,24 @@
 			</p>
 			<h1 class="page-display font-display mt-5">{post.title}</h1>
 			<p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted">{post.excerpt}</p>
+			<div class="mt-7 flex items-center justify-center gap-3">
+				{#if post.authorPhoto}
+					<img
+						src={post.authorPhoto}
+						alt={post.authorName || 'Post author'}
+						referrerpolicy="no-referrer"
+						class="h-11 w-11 rounded-full object-cover"
+					/>
+				{:else}
+					<span class="grid h-11 w-11 place-items-center rounded-full bg-blush text-sm font-semibold text-coral">
+						{(post.authorName || 'A').charAt(0)}
+					</span>
+				{/if}
+				<div class="text-left">
+					<p class="text-sm font-semibold">{post.authorName || 'Ashleigh Darnell'}</p>
+					<p class="text-xs text-muted">Author</p>
+				</div>
+			</div>
 		</header>
 
 		<div class="mx-auto max-w-6xl px-5 md:px-8">

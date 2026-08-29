@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { getIdToken } from 'firebase/auth';
 	import type { Campaign } from '$lib/content/site';
 	import { campaigns, newId, subscribers } from '$lib/content/site';
+	import { auth } from '$lib/firebase/client';
 	import {
 		deleteSubscriber,
 		saveCampaign as saveCampaignToFirebase,
@@ -11,6 +13,7 @@
 	let email = $state('');
 	let notice = $state('');
 	let composerOpen = $state(false);
+	let sending = $state(false);
 	let draft = $state<Campaign>({
 		id: '',
 		subject: '',
@@ -62,20 +65,58 @@
 			notice = 'Add a subject line first.';
 			return;
 		}
-		draft.status = send ? 'sent' : 'draft';
-		draft.updatedAt = new Date().toISOString().slice(0, 10);
+		if (!draft.body.trim()) {
+			notice = 'Add a message before saving or sending.';
+			return;
+		}
+		const activeReaders = $subscribers.filter((subscriber) => subscriber.status === 'active');
+		if (send && !activeReaders.length) {
+			notice = 'There are no active readers to send this campaign to.';
+			return;
+		}
+		sending = send;
 		try {
-			await saveCampaignToFirebase({ ...draft });
+			let sent = 0;
+			if (send) {
+				if (!auth?.currentUser) throw new Error('Your administrator session has expired.');
+				const token = await getIdToken(auth.currentUser);
+				const response = await fetch('/api/admin/newsletter', {
+					method: 'POST',
+					headers: {
+						authorization: `Bearer ${token}`,
+						'content-type': 'application/json'
+					},
+					body: JSON.stringify({
+						subject: draft.subject,
+						preview: draft.preview,
+						message: draft.body,
+						recipients: activeReaders.map((reader) => reader.email)
+					})
+				});
+				const result = (await response.json()) as { sent?: number; message?: string };
+				if (!response.ok) throw new Error(result.message || 'The newsletter could not be sent.');
+				sent = result.sent ?? activeReaders.length;
+			}
+
+			const savedDraft: Campaign = {
+				...draft,
+				status: send ? 'sent' : 'draft',
+				updatedAt: new Date().toISOString().slice(0, 10)
+			};
+			await saveCampaignToFirebase(savedDraft);
+			draft = savedDraft;
 			const exists = $campaigns.some((campaign) => campaign.id === draft.id);
 			$campaigns = exists
-				? $campaigns.map((campaign) => (campaign.id === draft.id ? { ...draft } : campaign))
-				: [{ ...draft }, ...$campaigns];
+				? $campaigns.map((campaign) => (campaign.id === draft.id ? savedDraft : campaign))
+				: [savedDraft, ...$campaigns];
 			composerOpen = false;
 			notice = send
-				? `Campaign status saved — no email was actually sent to ${activeCount} readers.`
+				? `Campaign sent to ${sent} ${sent === 1 ? 'reader' : 'readers'}.`
 				: 'Campaign draft saved to the server.';
 		} catch (error) {
 			notice = error instanceof Error ? error.message : 'Campaign could not be saved.';
+		} finally {
+			sending = false;
 		}
 	}
 
@@ -117,9 +158,8 @@
 		</div>
 		<button
 			type="button"
-			disabled
-			title="Campaign composing will be enabled after Ashleigh’s sender address is configured."
-			class="cursor-not-allowed rounded-full bg-line px-6 py-3 text-sm font-semibold text-muted opacity-70"
+			onclick={() => compose()}
+			class="rounded-full bg-teal px-6 py-3 text-sm font-semibold text-paper"
 		>
 			Compose email
 		</button>
@@ -155,7 +195,7 @@
 
 		<section class="rounded-[2rem] bg-paper p-6 md:p-8">
 			<h2 class="font-display text-3xl">Campaigns</h2>
-			<p class="mt-2 text-sm text-muted">Drafts and simulated sends.</p>
+			<p class="mt-2 text-sm text-muted">Draft and send emails from info@ashleighdarnell.com.</p>
 			<div class="mt-6 space-y-4">
 				{#each $campaigns as campaign (campaign.id)}
 					<button onclick={() => compose(campaign)} class="block w-full rounded-2xl border border-line p-5 text-left transition-colors hover:border-teal">
@@ -187,8 +227,23 @@
 				<label class="block"><span class="text-xs font-semibold">Message</span><textarea bind:value={draft.body} rows="10" class="mt-2 w-full resize-y rounded-2xl border border-line bg-mist px-4 py-3 leading-relaxed outline-none focus:border-teal"></textarea></label>
 			</div>
 			<div class="mt-7 flex flex-wrap justify-between gap-3 border-t border-line pt-6">
-				<p class="max-w-xs text-xs leading-relaxed text-muted">Send is simulated. This mockup never contacts subscribers.</p>
-				<div class="flex gap-2"><button onclick={() => saveCampaign(false)} class="rounded-full border border-line px-5 py-2.5 text-xs">Save draft</button><button onclick={() => saveCampaign(true)} class="rounded-full bg-teal px-5 py-2.5 text-xs font-semibold text-paper">Simulate send</button></div>
+				<p class="max-w-xs text-xs leading-relaxed text-muted">This email will be sent separately to every active reader.</p>
+				<div class="flex gap-2">
+					<button
+						onclick={() => saveCampaign(false)}
+						disabled={sending}
+						class="rounded-full border border-line px-5 py-2.5 text-xs disabled:opacity-50"
+					>
+						Save draft
+					</button>
+					<button
+						onclick={() => saveCampaign(true)}
+						disabled={sending}
+						class="rounded-full bg-teal px-5 py-2.5 text-xs font-semibold text-paper disabled:opacity-50"
+					>
+						{sending ? 'Sending…' : `Send to ${activeCount} ${activeCount === 1 ? 'reader' : 'readers'}`}
+					</button>
+				</div>
 			</div>
 		</div>
 	</div>

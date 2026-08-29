@@ -55,6 +55,16 @@
 					</p>
 					<h2 class="font-display mt-5 text-4xl leading-tight md:text-5xl">{featured.title}</h2>
 					<p class="mt-4 leading-relaxed text-muted">{featured.excerpt}</p>
+					<div class="mt-6 flex items-center gap-3">
+						{#if featured.authorPhoto}
+							<img src={featured.authorPhoto} alt="" referrerpolicy="no-referrer" class="h-9 w-9 rounded-full object-cover" />
+						{:else}
+							<span class="grid h-9 w-9 place-items-center rounded-full bg-paper text-sm font-semibold text-coral">
+								{(featured.authorName || 'A').charAt(0)}
+							</span>
+						{/if}
+						<p class="text-sm font-semibold">{featured.authorName || 'Ashleigh Darnell'}</p>
+					</div>
 					<span class="home-link mt-8 w-fit">{blog.readLabel}</span>
 				</div>
 			</a>
@@ -81,6 +91,16 @@
 						</p>
 						<h3 class="font-display mt-3 text-3xl leading-tight">{post.title}</h3>
 						<p class="mt-3 text-sm leading-relaxed text-muted">{post.excerpt}</p>
+						<div class="mt-5 flex items-center gap-2">
+							{#if post.authorPhoto}
+								<img src={post.authorPhoto} alt="" referrerpolicy="no-referrer" class="h-7 w-7 rounded-full object-cover" />
+							{:else}
+								<span class="grid h-7 w-7 place-items-center rounded-full bg-paper text-[10px] font-semibold text-coral">
+									{(post.authorName || 'A').charAt(0)}
+								</span>
+							{/if}
+							<p class="text-xs font-semibold text-muted">{post.authorName || 'Ashleigh Darnell'}</p>
+						</div>
 					</a>
 				</Reveal>
 			{/each}

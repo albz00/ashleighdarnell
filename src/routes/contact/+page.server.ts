@@ -4,7 +4,7 @@ import { loadContactFields } from '$lib/server/contact-fields';
 import type { Actions } from './$types';
 
 const RESEND_ENDPOINT = 'https://api.resend.com/emails';
-const FROM_EMAIL = 'info@hostverna.co';
+const FROM_EMAIL = 'Ashleigh Darnell <info@ashleighdarnell.com>';
 const TO_EMAIL = 'alzimmr1@gmail.com';
 
 type ContactValues = {

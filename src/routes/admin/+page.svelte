@@ -106,27 +106,20 @@
 
 	<div class="mt-9 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
 		{#each [
-			{ label: 'Published stories', value: publishedPosts.length, note: `${$posts.length - publishedPosts.length} drafts`, href: '/admin/blog', accent: 'bg-coral', tint: 'bg-blush text-coral' },
-			{ label: 'Newsletter readers', value: activeReaders.length, note: 'Active subscribers', href: '/admin/newsletter', accent: 'bg-teal', tint: 'bg-mint text-teal' },
-			{ label: 'Campaigns', value: $campaigns.length, note: `${$campaigns.filter((item) => item.status === 'draft').length} drafts`, href: '/admin/newsletter', accent: 'bg-marigold', tint: 'bg-butter text-ink' },
-			{ label: 'Live banners', value: activeBanner ? 1 : 0, note: activeBanner ? 'Visible now' : 'None active', href: '/admin/banners', accent: 'bg-violet', tint: 'bg-lilac text-violet' }
+			{ label: 'Published stories', value: publishedPosts.length, note: `${$posts.length - publishedPosts.length} drafts`, href: '/admin/blog', color: 'text-coral' },
+			{ label: 'Newsletter readers', value: activeReaders.length, note: 'Active subscribers', href: '/admin/newsletter', color: 'text-teal' },
+			{ label: 'Campaigns', value: $campaigns.length, note: `${$campaigns.filter((item) => item.status === 'draft').length} drafts`, href: '/admin/newsletter', color: 'text-marigold' },
+			{ label: 'Live banners', value: activeBanner ? 1 : 0, note: activeBanner ? 'Visible now' : 'None active', href: '/admin/banners', color: 'text-violet' }
 		] as stat}
 			<a
 				href={stat.href}
-				class="group relative overflow-hidden rounded-3xl border border-line bg-paper transition duration-300 hover:-translate-y-1 hover:border-ink/15 hover:shadow-[0_16px_40px_color-mix(in_srgb,var(--color-ink)_9%,transparent)]"
+				class="group rounded-3xl border border-line bg-paper p-6 transition duration-300 hover:-translate-y-1 hover:border-ink/15 hover:shadow-[0_16px_40px_color-mix(in_srgb,var(--color-ink)_9%,transparent)]"
 			>
-				<div class="h-1.5 {stat.accent}"></div>
-				<div class="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full opacity-45 {stat.tint}"></div>
-				<div class="relative p-6">
-					<p class="text-sm font-semibold text-muted">{stat.label}</p>
-					<div class="mt-6 flex items-end justify-between gap-4">
-						<p class="text-5xl font-bold leading-none tracking-[-0.05em] tabular-nums">{stat.value}</p>
-						<span class="rounded-full px-3 py-1 text-[10px] font-semibold {stat.tint}">{stat.note}</span>
-					</div>
-					<div class="mt-6 flex items-center justify-between border-t border-line pt-4">
-						<span class="text-xs text-muted">View details</span>
-						<span class="text-sm text-muted transition-transform group-hover:translate-x-1">→</span>
-					</div>
+				<p class="text-sm font-semibold text-muted">{stat.label}</p>
+				<p class="mt-7 text-5xl font-bold leading-none tracking-[-0.05em] tabular-nums {stat.color}">{stat.value}</p>
+				<div class="mt-6 flex items-center justify-between gap-4 border-t border-line pt-4">
+					<span class="text-xs text-muted">{stat.note}</span>
+					<span class="text-xs font-semibold text-ink transition-transform group-hover:translate-x-1">View details →</span>
 				</div>
 			</a>
 		{/each}

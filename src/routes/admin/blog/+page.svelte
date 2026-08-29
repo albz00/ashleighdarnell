@@ -2,6 +2,7 @@
 	import type { BlogPost } from '$lib/content/site';
 	import { newId, posts, slugify } from '$lib/content/site';
 	import { deletePost, savePost } from '$lib/firebase/repository';
+	import { authState } from '$lib/firebase/client';
 	import ImageSourcePicker from '$lib/components/admin/ImageSourcePicker.svelte';
 
 	const blank = (): BlogPost => ({
@@ -19,7 +20,10 @@
 		coverRotationSeconds: 8,
 		publishedAt: new Date().toISOString().slice(0, 10),
 		status: 'draft',
-		featured: false
+		featured: false,
+		authorName: $authState.user?.displayName || $authState.user?.email || 'Ashleigh Darnell',
+		authorEmail: $authState.user?.email || '',
+		authorPhoto: $authState.user?.photoURL || ''
 	});
 
 	let editing = $state<BlogPost | null>(null);
@@ -62,6 +66,12 @@
 		}
 		editing.slug = slugify(editing.slug || editing.title);
 		editing.alt ||= editing.title;
+		if (!editing.authorEmail && $authState.user) {
+			editing.authorName =
+				$authState.user.displayName || $authState.user.email || 'Ashleigh Darnell';
+			editing.authorEmail = $authState.user.email || '';
+			editing.authorPhoto = $authState.user.photoURL || '';
+		}
 		try {
 			await savePost({ ...editing });
 			const exists = $posts.some((post) => post.id === editing?.id);
@@ -126,6 +136,16 @@
 						{#if post.featured}<span class="rounded-full bg-lilac px-2.5 py-1 text-[9px] font-semibold uppercase text-violet">Featured</span>{/if}
 					</div>
 					<p class="mt-1 text-xs text-muted">{post.category} · {post.publishedAt} · /{post.slug}</p>
+					<div class="mt-2 flex items-center gap-2">
+						{#if post.authorPhoto}
+							<img src={post.authorPhoto} alt="" referrerpolicy="no-referrer" class="h-6 w-6 rounded-full object-cover" />
+						{:else}
+							<span class="grid h-6 w-6 place-items-center rounded-full bg-blush text-[10px] font-semibold text-coral">
+								{(post.authorName || 'A').charAt(0)}
+							</span>
+						{/if}
+						<p class="text-xs text-muted">{post.authorName || 'Ashleigh Darnell'}</p>
+					</div>
 					<p class="mt-2 line-clamp-1 text-sm text-muted">{post.excerpt}</p>
 				</div>
 				<div class="flex gap-2">
@@ -244,9 +264,19 @@
 				<label class="flex items-center gap-3"><input type="checkbox" bind:checked={editing.featured} class="accent-coral" /> <span class="text-sm">Feature this story</span></label>
 			</div>
 			<div class="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6">
+				<div class="flex items-center gap-4">
+					{#if $authState.user}
+						<div class="flex items-center gap-2">
+							{#if $authState.user.photoURL}
+								<img src={$authState.user.photoURL} alt="" referrerpolicy="no-referrer" class="h-8 w-8 rounded-full object-cover" />
+							{/if}
+							<span class="text-xs text-muted">Posting as {$authState.user.displayName || $authState.user.email}</span>
+						</div>
+					{/if}
 				<div class="flex rounded-full bg-mist p-1">
 					<button onclick={() => { if (editing) editing.status = 'draft'; }} class="rounded-full px-5 py-2 text-xs {editing.status === 'draft' ? 'bg-paper shadow-sm' : ''}">Draft</button>
 					<button onclick={() => { if (editing) editing.status = 'published'; }} class="rounded-full px-5 py-2 text-xs {editing.status === 'published' ? 'bg-teal text-paper' : ''}">Published</button>
+				</div>
 				</div>
 				<button onclick={save} class="btn-fun rounded-full bg-coral px-7 py-3 text-sm font-semibold text-paper">Save story</button>
 			</div>

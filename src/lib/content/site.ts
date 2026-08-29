@@ -103,6 +103,9 @@ export type BlogPost = {
 	publishedAt: string;
 	status: PostStatus;
 	featured: boolean;
+	authorName?: string;
+	authorEmail?: string;
+	authorPhoto?: string;
 };
 
 export type Subscriber = {

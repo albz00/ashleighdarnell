@@ -69,7 +69,7 @@ export async function requireFirebaseUser(request: Request) {
 	if (!administrator.ok) {
 		throw error(403, 'This account does not have administrator access.');
 	}
-	return user;
+	return { ...user, idToken };
 }
 
 export async function cloudflareRequest<T>(
