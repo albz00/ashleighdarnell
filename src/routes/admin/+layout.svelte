@@ -16,11 +16,20 @@
 		{ href: '/admin/blog', label: 'Blog posts' },
 		{ href: '/admin/newsletter', label: 'Newsletter' },
 		{ href: '/admin/banners', label: 'Banners' },
+		{ href: '/admin/fonts', label: 'Fonts' },
 		{ href: '/admin/theme', label: 'Site theme' }
 	];
 
 	$effect(() => {
-		if (browser && !isLogin && !$authState.loading && !$authState.user) goto('/admin/login');
+		if (
+			browser &&
+			!isLogin &&
+			!$authState.loading &&
+			!$authState.user &&
+			!$authState.retryable
+		) {
+			void goto('/admin/login', { replaceState: true });
+		}
 	});
 
 	async function logout() {
@@ -36,6 +45,34 @@
 		<div class="text-center">
 			<div class="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-line border-t-coral"></div>
 			<p class="mt-4 text-sm text-muted">Checking your session…</p>
+			{#if $authState.error}
+				<p class="mt-2 max-w-sm text-xs text-coral">{$authState.error}</p>
+			{/if}
+		</div>
+	</div>
+{:else if $authState.retryable && !$authState.user}
+	<div class="grid min-h-screen place-items-center bg-mist px-5">
+		<div class="max-w-md rounded-[2rem] bg-paper p-8 text-center shadow-sm">
+			<h1 class="font-display text-3xl">Session check paused</h1>
+			<p class="mt-3 text-sm leading-relaxed text-muted">
+				{$authState.error || 'The administrator session could not be verified.'}
+			</p>
+			<div class="mt-6 flex justify-center gap-3">
+				<button
+					type="button"
+					onclick={() => window.location.reload()}
+					class="rounded-full bg-coral px-6 py-3 text-xs font-semibold text-paper"
+				>
+					Retry
+				</button>
+				<button
+					type="button"
+					onclick={logout}
+					class="rounded-full bg-mist px-6 py-3 text-xs font-semibold text-ink"
+				>
+					Sign out
+				</button>
+			</div>
 		</div>
 	</div>
 {:else if $authState.user}
@@ -98,6 +135,11 @@
 			{#if $firebaseConnection.error}
 				<p class="mx-5 mt-5 rounded-2xl bg-blush px-5 py-3 text-sm text-coral md:mx-8">
 					Sync error: {$firebaseConnection.error}
+				</p>
+			{/if}
+			{#if $authState.error}
+				<p class="mx-5 mt-5 rounded-2xl bg-butter px-5 py-3 text-sm text-ink md:mx-8">
+					Session notice: {$authState.error}
 				</p>
 			{/if}
 			<main class="p-5 md:p-8 lg:p-10">{@render children()}</main>

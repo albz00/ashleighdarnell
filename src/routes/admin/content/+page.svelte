@@ -13,6 +13,7 @@
 	import { auth } from '$lib/firebase/client';
 	import ContactFormBuilder from '$lib/components/admin/ContactFormBuilder.svelte';
 	import ImageSourcePicker from '$lib/components/admin/ImageSourcePicker.svelte';
+	import PageSectionBuilder from '$lib/components/admin/PageSectionBuilder.svelte';
 
 	type PageKey = keyof PageContent;
 	type Field =
@@ -888,11 +889,11 @@
 		postToPreview({ type: 'ashleigh:preview-focus', sectionId });
 		if (!scroll) return;
 		setTimeout(() => {
-			const editor = document.querySelector<HTMLDetailsElement>(
+			const editor = document.querySelector<HTMLElement>(
 				`[data-editor-section="${sectionId}"]`
 			);
 			if (!editor) return;
-			editor.open = true;
+			if (editor instanceof HTMLDetailsElement) editor.open = true;
 			editor.scrollIntoView({ behavior: 'smooth', block: 'start' });
 		});
 	}
@@ -933,6 +934,30 @@
 		draft = next;
 		saveState = 'idle';
 		notice = '';
+	}
+
+	function moveBuiltInSection(sectionId: string, direction: -1 | 1) {
+		if (selectedPage !== 'photography' && selectedPage !== 'social') return;
+		const key = sectionId.split('.')[1];
+		const order = [...draft[selectedPage].sectionOrder];
+		const index = order.indexOf(key);
+		const destination = index + direction;
+		if (index < 0 || destination < 0 || destination >= order.length) return;
+		[order[index], order[destination]] = [order[destination], order[index]];
+		setPath('sectionOrder', order);
+	}
+
+	function sectionOrderFor(page: PageKey) {
+		if (page === 'photography') return draft.photography.sectionOrder;
+		if (page === 'social') return draft.social.sectionOrder;
+		return [];
+	}
+
+	function editorSectionOrder(sectionId: string) {
+		if (sectionId.endsWith('.seo')) return 0;
+		if (sectionId.endsWith('.hero')) return 1;
+		const index = sectionOrderFor(selectedPage).indexOf(sectionId.split('.')[1]);
+		return index < 0 ? 2 : index + 2;
 	}
 
 	function setMedia(path: string, key: keyof MediaContent, value: string) {
@@ -1368,12 +1393,25 @@
 			</details>
 		</div>
 	{:else}
-		<div class="mt-6 space-y-5">
+		<div class="mt-6 flex flex-col gap-5">
+			{#if selectedPage === 'photography' || selectedPage === 'social'}
+				<PageSectionBuilder
+					sections={draft[selectedPage].sections}
+					sectionOrder={draft[selectedPage].sectionOrder}
+					page={selectedPage}
+					onchange={(sections) => setPath('sections', sections)}
+					onorderchange={(order) => setPath('sectionOrder', order)}
+					onselect={selectEditorSection}
+				/>
+			{/if}
 			{#each visibleSections as section (section.id)}
+				{@const orderKey = section.id.split('.')[1]}
+				{@const orderIndex = sectionOrderFor(selectedPage).indexOf(orderKey)}
 				<details
 					class="group scroll-mt-24 overflow-hidden rounded-[2rem] border bg-paper {selectedSection === section.id ? 'border-coral' : 'border-line'}"
 					data-editor-section={section.id}
 					open={Boolean(contentSearch) || section.id === defaultSectionFor(selectedPage)}
+					style:order={editorSectionOrder(section.id)}
 				>
 					<summary
 						class="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 md:px-8"
@@ -1388,6 +1426,27 @@
 						<span class="text-xl text-muted transition-transform group-open:rotate-45">+</span>
 					</summary>
 					<div class="grid gap-5 border-t border-line p-6 md:grid-cols-2 md:p-8">
+						{#if orderIndex >= 0}
+							<div class="flex items-center gap-2 rounded-2xl bg-mist p-3 md:col-span-2">
+								<span class="mr-auto text-xs font-semibold">Page position</span>
+								<button
+									type="button"
+									onclick={() => moveBuiltInSection(section.id, -1)}
+									disabled={orderIndex === 0}
+									class="rounded-full bg-paper px-4 py-2 text-xs font-semibold disabled:opacity-35"
+								>
+									↑ Move up
+								</button>
+								<button
+									type="button"
+									onclick={() => moveBuiltInSection(section.id, 1)}
+									disabled={orderIndex === sectionOrderFor(selectedPage).length - 1}
+									class="rounded-full bg-paper px-4 py-2 text-xs font-semibold disabled:opacity-35"
+								>
+									↓ Move down
+								</button>
+							</div>
+						{/if}
 						{#if section.id === 'photography.gallery'}
 							<div class="flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-blush p-5 md:col-span-2">
 								<div>

@@ -23,6 +23,59 @@ export type CursorId = 'meadow' | 'wildflower' | 'sparkle' | 'camera' | 'butterf
 export type CursorSettings = {
 	cursor: CursorId;
 };
+export type FontPairId = 'field-notes' | 'editorial' | 'modern-story' | 'timeless' | 'fashion';
+export type FontSettings = {
+	pair: FontPairId;
+};
+export const fontPairOptions: Array<{
+	id: FontPairId;
+	name: string;
+	display: string;
+	body: string;
+	script: string;
+	description: string;
+}> = [
+	{
+		id: 'field-notes',
+		name: 'Field Notes',
+		display: 'Rosarivo',
+		body: 'Bricolage Grotesque',
+		script: 'Corinthia',
+		description: 'Warm, personal, and outdoorsy—the original photography pairing.'
+	},
+	{
+		id: 'editorial',
+		name: 'Editorial Portrait',
+		display: 'Cormorant Garamond',
+		body: 'Manrope',
+		script: 'Caveat',
+		description: 'Elegant editorial headlines with clean, approachable marketing copy.'
+	},
+	{
+		id: 'modern-story',
+		name: 'Modern Story',
+		display: 'DM Serif Display',
+		body: 'DM Sans',
+		script: 'Allura',
+		description: 'Confident brand typography balanced with a soft handwritten accent.'
+	},
+	{
+		id: 'timeless',
+		name: 'Timeless Gallery',
+		display: 'Playfair Display',
+		body: 'Source Sans 3',
+		script: 'Sacramento',
+		description: 'Classic gallery style with highly readable supporting text.'
+	},
+	{
+		id: 'fashion',
+		name: 'Fashion Campaign',
+		display: 'Bodoni Moda',
+		body: 'Work Sans',
+		script: 'Dancing Script',
+		description: 'High-contrast campaign headlines with a crisp contemporary body.'
+	}
+];
 export type ThemeId =
 	| 'meadow'
 	| 'sunset'
@@ -305,6 +358,9 @@ export const effectSettings = persisted<EffectSettings>('ashleigh.effects', {
 });
 export const cursorSettings = persisted<CursorSettings>('ashleigh.cursor', {
 	cursor: 'meadow'
+});
+export const fontSettings = persisted<FontSettings>('ashleigh.fonts', {
+	pair: 'field-notes'
 });
 
 export const newId = (prefix: string) =>

@@ -20,6 +20,7 @@ import {
 	campaigns,
 	cursorSettings,
 	effectSettings,
+	fontSettings,
 	posts,
 	selectedTheme,
 	subscribers,
@@ -27,6 +28,7 @@ import {
 	type Campaign,
 	type CursorSettings,
 	type EffectSettings,
+	type FontSettings,
 	type SiteBanner,
 	type Subscriber,
 	type ThemeId
@@ -104,6 +106,9 @@ function startPublicListeners() {
 				cursorSettings.set({
 					cursor: data.cursor?.cursor ?? 'meadow'
 				} as CursorSettings);
+				fontSettings.set({
+					pair: data.fonts?.pair ?? 'field-notes'
+				} as FontSettings);
 			}
 			firebaseConnection.set({ ready: true, syncing: false, error: '' });
 		},
@@ -157,7 +162,8 @@ async function seedEmptyProject() {
 		await setDoc(settingsReference, {
 			theme: get(selectedTheme),
 			effects: get(effectSettings),
-			cursor: get(cursorSettings)
+			cursor: get(cursorSettings),
+			fonts: get(fontSettings)
 		});
 	}
 
@@ -201,10 +207,11 @@ export async function savePageContent(value: PageContent) {
 export async function saveSiteSettings(
 	theme: ThemeId,
 	effects: EffectSettings,
-	cursor: CursorSettings
+	cursor: CursorSettings,
+	fonts: FontSettings = get(fontSettings)
 ) {
 	requireAdmin();
-	await setDoc(doc(requireDatabase(), 'site', 'settings'), { theme, effects, cursor });
+	await setDoc(doc(requireDatabase(), 'site', 'settings'), { theme, effects, cursor, fonts });
 }
 
 export async function savePost(post: BlogPost) {

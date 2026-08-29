@@ -34,6 +34,28 @@ export type ContactCustomField = {
 	options: string[];
 };
 
+export type SectionSurface = 'paper' | 'mist' | 'blush' | 'butter' | 'mint' | 'lilac';
+export type PageSectionType = 'normal' | 'pricing';
+
+export type PageSectionItem = {
+	id: string;
+	title: string;
+	text: string;
+	price: string;
+	features: string[];
+};
+
+export type PageSectionBlock = {
+	id: string;
+	type: PageSectionType;
+	enabled: boolean;
+	surface: SectionSurface;
+	title: string;
+	intro: string;
+	buttonLabel: string;
+	items: PageSectionItem[];
+};
+
 export type PageContent = {
 	global: {
 		firstName: string;
@@ -81,6 +103,8 @@ export type PageContent = {
 		ctaTitle: string;
 		ctaText: string;
 		ctaButton: string;
+		sections: PageSectionBlock[];
+		sectionOrder: string[];
 	};
 	social: {
 		seoTitle: string;
@@ -96,6 +120,8 @@ export type PageContent = {
 		ctaTitle: string;
 		ctaText: string;
 		ctaButton: string;
+		sections: PageSectionBlock[];
+		sectionOrder: string[];
 	};
 	about: {
 		seoTitle: string;
@@ -258,7 +284,28 @@ export const defaultPageContent: PageContent = {
 		],
 		ctaTitle: 'Ready to step in front of the camera?',
 		ctaText: 'Solo, couples, families, weddings, and events are all welcome.',
-		ctaButton: 'Book a session'
+		ctaButton: 'Book a session',
+		sections: [
+			{
+				id: 'photography-pricing',
+				type: 'pricing',
+				enabled: true,
+				surface: 'paper',
+				title: 'Photography pricing',
+				intro: 'Every session is different. Reach out for a package shaped around your story.',
+				buttonLabel: 'Ask for a quote',
+				items: [
+					{
+						id: 'photo-package',
+						title: 'Custom photography',
+						text: 'Portraits, events, wildlife, landscapes, and creative sessions planned around your needs.',
+						price: 'Custom quote',
+						features: []
+					}
+				]
+			}
+		],
+		sectionOrder: ['gallery', 'photography-pricing', 'cta']
 	},
 	social: {
 		seoTitle: 'Social Media - Ashleigh Darnell',
@@ -291,7 +338,28 @@ export const defaultPageContent: PageContent = {
 		],
 		ctaTitle: 'Have a story worth sharing?',
 		ctaText: 'Let’s turn it into thoughtful, memorable content.',
-		ctaButton: 'Work together'
+		ctaButton: 'Work together',
+		sections: [
+			{
+				id: 'social-pricing',
+				type: 'pricing',
+				enabled: true,
+				surface: 'paper',
+				title: 'Social media pricing',
+				intro: 'Content support can be tailored to a single project or an ongoing creative partnership.',
+				buttonLabel: 'Ask for a quote',
+				items: [
+					{
+						id: 'social-package',
+						title: 'Custom social package',
+						text: 'A flexible mix of content creation, visual storytelling, and communication support.',
+						price: 'Custom quote',
+						features: []
+					}
+				]
+			}
+		],
+		sectionOrder: ['background', 'reels', 'services', 'social-pricing', 'cta']
 	},
 	about: {
 		seoTitle: 'About - Ashleigh Darnell',
@@ -466,17 +534,130 @@ export function normalizeContactFields(fields: unknown): ContactCustomField[] {
 	});
 }
 
+function cleanText(value: unknown, maximum: number) {
+	return typeof value === 'string' ? value.trim().slice(0, maximum) : '';
+}
+
+export function normalizePageSections(sections: unknown): PageSectionBlock[] {
+	if (!Array.isArray(sections)) return [];
+	const surfaces: SectionSurface[] = ['paper', 'mist', 'blush', 'butter', 'mint', 'lilac'];
+	const seen = new Set<string>();
+
+	return sections.slice(0, 12).flatMap((value, sectionIndex) => {
+		if (!value || typeof value !== 'object') return [];
+		const candidate = value as Partial<PageSectionBlock>;
+		const baseId = cleanText(candidate.id, 48)
+			.toLowerCase()
+			.replace(/[^a-z0-9-]/g, '');
+		let id = baseId || `section-${sectionIndex + 1}`;
+		while (seen.has(id)) id = `${id}-${sectionIndex + 1}`;
+		seen.add(id);
+		const type: PageSectionType = candidate.type === 'pricing' ? 'pricing' : 'normal';
+		const surface = surfaces.includes(candidate.surface as SectionSurface)
+			? (candidate.surface as SectionSurface)
+			: 'paper';
+		const itemIds = new Set<string>();
+		const items = Array.isArray(candidate.items)
+			? candidate.items.slice(0, 12).flatMap((item, itemIndex) => {
+					if (!item || typeof item !== 'object') return [];
+					const entry = item as Partial<PageSectionItem>;
+					const baseItemId =
+						cleanText(entry.id, 48)
+							.toLowerCase()
+							.replace(/[^a-z0-9-]/g, '') || `item-${itemIndex + 1}`;
+					let itemId = baseItemId;
+					while (itemIds.has(itemId)) itemId = `${baseItemId}-${itemIndex + 1}`;
+					itemIds.add(itemId);
+					return [
+						{
+							id: itemId,
+							title: cleanText(entry.title, 120),
+							text: cleanText(entry.text, 1200),
+							price: cleanText(entry.price, 80),
+							features: Array.isArray(entry.features)
+								? entry.features
+										.map((feature) => cleanText(feature, 160))
+										.filter(Boolean)
+										.slice(0, 12)
+								: []
+						}
+					];
+				})
+			: [];
+
+		return [
+			{
+				id,
+				type,
+				enabled: candidate.enabled !== false,
+				surface,
+				title: cleanText(candidate.title, 160),
+				intro: cleanText(candidate.intro, 1200),
+				buttonLabel: cleanText(candidate.buttonLabel, 80),
+				items
+			}
+		];
+	});
+}
+
+function normalizeSectionOrder(
+	value: unknown,
+	builtIn: string[],
+	sections: PageSectionBlock[]
+) {
+	const customIds = sections.map((section) => section.id);
+	const valid = new Set([...builtIn, ...customIds]);
+	const requested = Array.isArray(value)
+		? value.filter((id): id is string => typeof id === 'string' && valid.has(id))
+		: [...builtIn.slice(0, -1), ...customIds, builtIn.at(-1)!];
+	const order = [...new Set(requested)];
+	for (const id of [...builtIn.slice(0, -1), ...customIds, builtIn.at(-1)!]) {
+		if (!order.includes(id)) order.push(id);
+	}
+	return order;
+}
+
 export function normalizePageContent(value: PageContent): PageContent {
 	const contact = value?.contact ?? defaultPageContent.contact;
+	const photography = value?.photography ?? defaultPageContent.photography;
+	const social = value?.social ?? defaultPageContent.social;
 	const rawFields =
 		Array.isArray(contact.fields)
 			? contact.fields
 			: legacyContactFields(contact);
 	const fields = normalizeContactFields(rawFields);
+	const photographySections = Array.isArray(photography.sections)
+		? photography.sections
+		: defaultPageContent.photography.sections;
+	const socialSections = Array.isArray(social.sections)
+		? social.sections
+		: defaultPageContent.social.sections;
+	const normalizedPhotographySections = normalizePageSections(photographySections);
+	const normalizedSocialSections = normalizePageSections(socialSections);
 
 	return {
 		...structuredClone(defaultPageContent),
 		...value,
+		photography: {
+			...structuredClone(defaultPageContent.photography),
+			...photography,
+			sections: normalizedPhotographySections,
+			sectionOrder: normalizeSectionOrder(
+				photography.sectionOrder,
+				['gallery', 'cta'],
+				normalizedPhotographySections
+			)
+		},
+		social: {
+			...structuredClone(defaultPageContent.social),
+			...social,
+			sections: normalizedSocialSections,
+			sectionOrder: normalizeSectionOrder(
+				social.sectionOrder,
+				['background', 'reels', 'services', 'cta'],
+				normalizedSocialSections
+			)
+		},
 		contact: {
 			...structuredClone(defaultPageContent.contact),
 			...contact,

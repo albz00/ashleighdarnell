@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ContentSectionBlock from '$lib/components/ContentSectionBlock.svelte';
 	import Placeholder from '$lib/components/Placeholder.svelte';
 	import Reveal from '$lib/components/Reveal.svelte';
 	import Wave from '$lib/components/Wave.svelte';
@@ -68,6 +69,8 @@
 	{/if}
 </section>
 
+<div class="flex flex-col">
+<div style:order={photography.sectionOrder.indexOf('gallery')}>
 <section class="sticky top-[100px] z-40 border-y border-line bg-paper/90 backdrop-blur md:top-[120px]" data-content-section="photography.filters" data-content-label="Photography → Filters">
 	<div class="mx-auto flex max-w-6xl gap-2 overflow-x-auto px-5 py-3 md:px-8">
 		{#each photography.categories as category (category)}
@@ -122,8 +125,15 @@
 		</div>
 	{/if}
 </section>
+</div>
 
-<div>
+{#each photography.sections.filter((section) => section.enabled) as section (section.id)}
+	<div style:order={photography.sectionOrder.indexOf(section.id)}>
+		<ContentSectionBlock block={section} page="photography" />
+	</div>
+{/each}
+
+<div style:order={photography.sectionOrder.indexOf('cta')}>
 	<Wave fill="blush" size="lg" class="bg-paper" />
 	<section class="bg-blush" data-content-section="photography.cta" data-content-label="Photography → Contact callout">
 		<div
@@ -147,4 +157,5 @@
 			</Reveal>
 		</div>
 	</section>
+</div>
 </div>

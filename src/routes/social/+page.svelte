@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ContentSectionBlock from '$lib/components/ContentSectionBlock.svelte';
 	import Placeholder from '$lib/components/Placeholder.svelte';
 	import Reveal from '$lib/components/Reveal.svelte';
 	import Wave from '$lib/components/Wave.svelte';
@@ -45,7 +46,8 @@
 	{/if}
 </section>
 
-<section class="mx-auto max-w-6xl px-5 pt-12 md:px-8 md:pt-16" data-content-section="social.background" data-content-label="Social → Background">
+<div class="flex flex-col">
+<section style:order={social.sectionOrder.indexOf('background')} class="mx-auto w-full max-w-6xl px-5 pt-12 md:px-8 md:pt-16" data-content-section="social.background" data-content-label="Social → Background">
 	<Reveal>
 		<div class="flex items-center gap-4">
 			<p class="shrink-0 text-[10px] font-bold uppercase tracking-[0.24em] text-muted">
@@ -77,7 +79,7 @@
 	</div>
 </section>
 
-<section class="mx-auto max-w-6xl px-5 py-16 md:px-8 md:py-24" data-content-section="social.reels" data-content-label="Social → Reels">
+<section style:order={social.sectionOrder.indexOf('reels')} class="mx-auto w-full max-w-6xl px-5 py-16 md:px-8 md:py-24" data-content-section="social.reels" data-content-label="Social → Reels">
 	<Reveal>
 		<h2 class="page-section-title font-display max-w-3xl">{social.contentTitle}</h2>
 	</Reveal>
@@ -126,7 +128,7 @@
 	{/if}
 </section>
 
-<section data-content-section="social.services" data-content-label="Social → Services">
+<section style:order={social.sectionOrder.indexOf('services')} data-content-section="social.services" data-content-label="Social → Services">
 	<div class="mx-auto max-w-6xl px-5 py-16 md:px-8 md:py-20">
 		<Reveal>
 			<h2 class="page-section-title font-display max-w-3xl">{social.servicesTitle}</h2>
@@ -151,7 +153,13 @@
 	</div>
 </section>
 
-<div>
+{#each social.sections.filter((section) => section.enabled) as section (section.id)}
+	<div style:order={social.sectionOrder.indexOf(section.id)}>
+		<ContentSectionBlock block={section} page="social" />
+	</div>
+{/each}
+
+<div style:order={social.sectionOrder.indexOf('cta')}>
 	<Wave fill="mint" size="lg" class="bg-paper" />
 	<section class="bg-mint" data-content-section="social.cta" data-content-label="Social → Contact callout">
 		<div
@@ -177,4 +185,5 @@
 			</Reveal>
 		</div>
 	</section>
+</div>
 </div>

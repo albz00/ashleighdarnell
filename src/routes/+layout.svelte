@@ -7,7 +7,7 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import SeasonalEffects from '$lib/components/SeasonalEffects.svelte';
 	import SiteBanner from '$lib/components/SiteBanner.svelte';
-	import { cursorSettings, selectedTheme } from '$lib/content/site';
+	import { cursorSettings, fontSettings, selectedTheme } from '$lib/content/site';
 	import { pageContent, type PageContent } from '$lib/content/page-content';
 	import { startFirebaseSync } from '$lib/firebase/repository';
 
@@ -83,7 +83,8 @@
 	class:builder-preview={isBuilderPreview}
 	class:builder-inspect={isBuilderPreview && builderInspect}
 	data-theme={$selectedTheme}
-	data-site-cursor={!isAdmin ? $cursorSettings.cursor : undefined}
+	data-font-pair={$fontSettings.pair}
+	data-site-cursor={$cursorSettings.cursor}
 >
 	{#if !isAdmin}
 		<SeasonalEffects />
