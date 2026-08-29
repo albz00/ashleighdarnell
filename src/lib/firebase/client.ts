@@ -6,11 +6,10 @@ import {
 	getAuth,
 	onAuthStateChanged,
 	setPersistence,
-	signOut,
 	type Auth,
 	type User
 } from 'firebase/auth';
-import { doc, getDoc, getFirestore, type Firestore } from 'firebase/firestore';
+import { doc, getDocFromServer, getFirestore, type Firestore } from 'firebase/firestore';
 import { writable } from 'svelte/store';
 
 const firebaseConfig = {
@@ -45,17 +44,13 @@ export const firebaseApp: FirebaseApp | null = browser
 export const auth: Auth | null = firebaseApp ? getAuth(firebaseApp) : null;
 export const db: Firestore | null = firebaseApp ? getFirestore(firebaseApp) : null;
 
-function errorCode(error: unknown) {
-	return error && typeof error === 'object' && 'code' in error ? String(error.code) : '';
-}
-
 function delay(milliseconds: number) {
 	return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
 async function readAdminAccess(user: User) {
 	if (!db) throw new Error('Firebase is unavailable in this browser.');
-	const administrator = await getDoc(doc(db, 'admins', user.uid));
+	const administrator = await getDocFromServer(doc(db, 'admins', user.uid));
 	return administrator.exists();
 }
 
@@ -66,7 +61,6 @@ export async function hasAdminAccess(user: User) {
 			return await readAdminAccess(user);
 		} catch (error) {
 			lastError = error;
-			if (errorCode(error).includes('permission-denied')) throw error;
 			if (attempt < 2) await delay(300 * (attempt + 1));
 		}
 	}
@@ -153,11 +147,9 @@ async function initializeAuth(authInstance: Auth) {
 							error: 'This account does not have administrator access.',
 							retryable: false
 						});
-						await signOut(authInstance);
 						return;
 					} catch (error) {
 						if (sequence !== authSequence) return;
-						if (errorCode(error).includes('permission-denied')) throw error;
 						if (retry < 4) {
 							authState.set({
 								user: previouslyVerified,
@@ -178,14 +170,12 @@ async function initializeAuth(authInstance: Auth) {
 				});
 			} catch (error: unknown) {
 				if (sequence !== authSequence) return;
-				verifiedUser = null;
 				authState.set({
-					user: null,
+					user: previouslyVerified,
 					loading: false,
 					error: error instanceof Error ? error.message : 'Administrator access could not be verified.',
-					retryable: false
+					retryable: true
 				});
-				await signOut(authInstance);
 			}
 		},
 		(error) => {
@@ -201,4 +191,4 @@ async function initializeAuth(authInstance: Auth) {
 	);
 }
 
-if (auth) void initializeAuth(auth);
+export const authReady: Promise<void> = auth ? initializeAuth(auth) : Promise.resolve();

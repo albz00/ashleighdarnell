@@ -3,11 +3,9 @@
 	import {
 		GoogleAuthProvider,
 		signInWithEmailAndPassword,
-		signInWithPopup,
-		signOut,
-		type User
+		signInWithPopup
 	} from 'firebase/auth';
-	import { auth, authState, hasAdminAccess } from '$lib/firebase/client';
+	import { auth, authReady, authState } from '$lib/firebase/client';
 
 	let email = $state('');
 	let password = $state('');
@@ -17,12 +15,6 @@
 	$effect(() => {
 		if ($authState.user) goto('/admin');
 	});
-
-	async function authorize(user: User) {
-		if (await hasAdminAccess(user)) return;
-		if (auth) await signOut(auth);
-		throw new Error('This Google account does not have administrator access.');
-	}
 
 	function loginError(error: unknown) {
 		const code = error && typeof error === 'object' && 'code' in error ? String(error.code) : '';
@@ -48,9 +40,8 @@
 		loading = 'email';
 		errorMessage = '';
 		try {
-			const credential = await signInWithEmailAndPassword(auth, email.trim(), password);
-			await authorize(credential.user);
-			await goto('/admin');
+			await authReady;
+			await signInWithEmailAndPassword(auth, email.trim(), password);
 		} catch (error: unknown) {
 			errorMessage = loginError(error);
 		} finally {
@@ -66,9 +57,10 @@
 		loading = 'google';
 		errorMessage = '';
 		try {
-			const credential = await signInWithPopup(auth, new GoogleAuthProvider());
-			await authorize(credential.user);
-			await goto('/admin');
+			await authReady;
+			const provider = new GoogleAuthProvider();
+			provider.setCustomParameters({ prompt: 'select_account' });
+			await signInWithPopup(auth, provider);
 		} catch (error: unknown) {
 			errorMessage = loginError(error);
 		} finally {
