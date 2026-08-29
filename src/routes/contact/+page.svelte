@@ -2,10 +2,12 @@
 	import { enhance } from '$app/forms';
 	import Reveal from '$lib/components/Reveal.svelte';
 	import { pageContent } from '$lib/content/page-content';
+	import { subscribeToNewsletter } from '$lib/firebase/repository';
 	import type { ActionData } from './$types';
 
 	let { form }: { form: ActionData } = $props();
 	let submitting = $state(false);
+	let newsletterMessage = $state('');
 	const contact = $derived($pageContent.contact);
 </script>
 
@@ -39,9 +41,32 @@
 				class="space-y-6 rounded-[2.5rem] bg-mist p-6 md:p-8"
 				data-content-section="contact.form"
 				data-content-label="Contact → Inquiry form"
-				use:enhance={() => {
+				use:enhance={({ formData }) => {
+					const newsletterConsent = formData.get('newsletterConsent') === 'yes';
+					const subscriberName = String(formData.get('name') ?? '');
+					const subscriberEmail = String(formData.get('email') ?? '');
 					submitting = true;
 					return async ({ result, update }) => {
+						newsletterMessage = '';
+						if (result.type === 'success' && newsletterConsent) {
+							try {
+								await subscribeToNewsletter(
+									subscriberName,
+									subscriberEmail,
+									'contact-form'
+								);
+								newsletterMessage = 'You’ve also been added to the newsletter.';
+							} catch (error: unknown) {
+								const code =
+									error && typeof error === 'object' && 'code' in error
+										? String(error.code)
+										: '';
+								newsletterMessage =
+									code === 'permission-denied'
+										? 'You’re already on the newsletter list.'
+										: 'Your message was sent, but the newsletter signup could not be completed.';
+							}
+						}
 						await update({ reset: result.type === 'success' });
 						submitting = false;
 					};
@@ -80,18 +105,67 @@
 					</label>
 				</div>
 
-				<label class="block">
-					<span class="text-[11px] uppercase tracking-[0.2em] text-muted">{contact.interestLabel}</span>
-					<select
-						name="interest"
-						required
-						class="mt-2 w-full rounded-2xl border border-line bg-mist/60 px-4 py-3 outline-none transition-all duration-200 focus:border-coral focus:bg-paper focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--color-coral)_18%,transparent)]"
-					>
-						{#each contact.interestOptions as option}
-							<option selected={form?.values?.interest === option}>{option}</option>
-						{/each}
-					</select>
-				</label>
+				{#each contact.fields as field (field.id)}
+					{#if field.type === 'checkbox'}
+						<label class="flex cursor-pointer items-start gap-3 rounded-2xl bg-paper/70 px-4 py-3.5">
+							<input
+								type="checkbox"
+								name="field:{field.id}"
+								value="yes"
+								required={field.required}
+								checked={form?.customValues?.[field.id] === 'yes'}
+								class="mt-0.5 h-4 w-4 shrink-0 accent-coral"
+							/>
+							<span class="text-sm leading-relaxed text-muted">
+								{field.label}{field.required ? ' *' : ''}
+							</span>
+						</label>
+					{:else}
+						<label class="block">
+							<span class="text-[11px] uppercase tracking-[0.2em] text-muted">
+								{field.label}{field.required ? ' *' : ''}
+							</span>
+							{#if field.type === 'select'}
+								<select
+									name="field:{field.id}"
+									required={field.required}
+									class="mt-2 w-full rounded-2xl border border-line bg-mist/60 px-4 py-3 outline-none transition-all duration-200 focus:border-coral focus:bg-paper focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--color-coral)_18%,transparent)]"
+								>
+									{#if !field.required}
+										<option value="">Choose an option</option>
+									{/if}
+									{#each field.options as option}
+										<option
+											value={option}
+											selected={form?.customValues?.[field.id] === option}
+										>{option}</option>
+									{/each}
+								</select>
+							{:else if field.type === 'textarea'}
+								<textarea
+									name="field:{field.id}"
+									required={field.required}
+									maxlength="5000"
+									rows="4"
+									placeholder={field.placeholder}
+									class="mt-2 w-full resize-y rounded-2xl border border-line bg-mist/60 px-4 py-3 outline-none transition-all duration-200 focus:border-coral focus:bg-paper focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--color-coral)_18%,transparent)]"
+								>{form?.customValues?.[field.id] ?? ''}</textarea>
+							{:else}
+								<input
+									type={field.type === 'phone' ? 'tel' : 'text'}
+									name="field:{field.id}"
+									required={field.required}
+									maxlength={field.type === 'phone' ? 40 : 500}
+									autocomplete={field.type === 'phone' ? 'tel' : 'off'}
+									inputmode={field.type === 'phone' ? 'tel' : undefined}
+									value={form?.customValues?.[field.id] ?? ''}
+									placeholder={field.placeholder}
+									class="mt-2 w-full rounded-2xl border border-line bg-mist/60 px-4 py-3 outline-none transition-all duration-200 focus:border-coral focus:bg-paper focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--color-coral)_18%,transparent)]"
+								/>
+							{/if}
+						</label>
+					{/if}
+				{/each}
 
 				<label class="block">
 					<span class="text-[11px] uppercase tracking-[0.2em] text-muted">{contact.messageLabel}</span>
@@ -105,6 +179,18 @@
 					>{form?.values?.message ?? ''}</textarea>
 				</label>
 
+				<label class="flex cursor-pointer items-start gap-3 rounded-2xl bg-paper/70 px-4 py-3.5">
+					<input
+						type="checkbox"
+						name="newsletterConsent"
+						value="yes"
+						class="mt-0.5 h-4 w-4 shrink-0 accent-coral"
+					/>
+					<span class="text-sm leading-relaxed text-muted">
+						Yes, I’d like to receive occasional stories, photographs, and creative updates by email.
+					</span>
+				</label>
+
 				<button
 					type="submit"
 					disabled={submitting}
@@ -112,13 +198,16 @@
 				>
 					{submitting ? 'Sending…' : contact.sendButton}
 				</button>
-				{#if form?.success || form?.message}
+				{#if form?.success || form?.message || newsletterMessage}
 					<p
 						class:text-coral={form?.success}
 						class="text-xs text-muted"
 						aria-live="polite"
 					>
-						{form.success ? 'Thanks! Your message has been sent.' : form.message}
+						{form?.success ? 'Thanks! Your message has been sent.' : form?.message}
+						{#if newsletterMessage}
+							<span class="mt-1 block">{newsletterMessage}</span>
+						{/if}
 					</p>
 				{/if}
 			</form>

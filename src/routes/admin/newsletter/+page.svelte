@@ -115,7 +115,14 @@
 			<h1 class="font-display text-5xl">Newsletter</h1>
 			<p class="mt-3 text-muted">{activeCount} active readers · synced with the server</p>
 		</div>
-		<button onclick={() => compose()} class="btn-fun rounded-full bg-teal px-6 py-3 text-sm font-semibold text-paper">Compose email</button>
+		<button
+			type="button"
+			disabled
+			title="Campaign composing will be enabled after Ashleigh’s sender address is configured."
+			class="cursor-not-allowed rounded-full bg-line px-6 py-3 text-sm font-semibold text-muted opacity-70"
+		>
+			Compose email
+		</button>
 	</div>
 
 	{#if notice}<p class="mt-6 rounded-2xl bg-butter px-5 py-3 text-sm">{notice}</p>{/if}

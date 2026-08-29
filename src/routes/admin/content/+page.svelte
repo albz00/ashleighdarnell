@@ -3,6 +3,7 @@
 	import { getIdToken } from 'firebase/auth';
 	import {
 		defaultPageContent,
+		normalizePageContent,
 		pageContent,
 		type MediaContent,
 		type PageContent
@@ -10,6 +11,7 @@
 	import { photoFilters } from '$lib/content/photography';
 	import { savePageContent } from '$lib/firebase/repository';
 	import { auth } from '$lib/firebase/client';
+	import ContactFormBuilder from '$lib/components/admin/ContactFormBuilder.svelte';
 	import ImageSourcePicker from '$lib/components/admin/ImageSourcePicker.svelte';
 
 	type PageKey = keyof PageContent;
@@ -237,8 +239,6 @@
 					'namePlaceholder',
 					'emailLabel',
 					'emailPlaceholder',
-					'interestLabel',
-					'interestOptions',
 					'messageLabel',
 					'messagePlaceholder',
 					'sendButton',
@@ -969,8 +969,9 @@
 		saveState = 'saving';
 		if (saveResetTimer) clearTimeout(saveResetTimer);
 		try {
-			const snapshot = structuredClone($state.snapshot(draft));
+			const snapshot = normalizePageContent(structuredClone($state.snapshot(draft)));
 			await savePageContent(snapshot);
+			draft = structuredClone(snapshot);
 			$pageContent = snapshot;
 			notice = 'Content and image replacements saved to the server.';
 			saveState = 'saved';
@@ -1415,6 +1416,12 @@
 									Add reel
 								</button>
 							</div>
+						{/if}
+						{#if section.id === 'contact.form'}
+							<ContactFormBuilder
+								fields={draft.contact.fields}
+								onchange={(fields) => setPath('fields', fields)}
+							/>
 						{/if}
 						{#each section.fields as field (field.path)}
 							{#if field.kind === 'media'}

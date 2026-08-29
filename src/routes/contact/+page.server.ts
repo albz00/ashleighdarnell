@@ -1,5 +1,6 @@
 import { env as privateEnv } from '$env/dynamic/private';
 import { fail } from '@sveltejs/kit';
+import { loadContactFields } from '$lib/server/contact-fields';
 import type { Actions } from './$types';
 
 const RESEND_ENDPOINT = 'https://api.resend.com/emails';
@@ -9,7 +10,6 @@ const TO_EMAIL = 'alzimmr1@gmail.com';
 type ContactValues = {
 	name: string;
 	email: string;
-	interest: string;
 	message: string;
 };
 
@@ -17,7 +17,6 @@ function formValues(formData: FormData): ContactValues {
 	return {
 		name: String(formData.get('name') ?? '').trim(),
 		email: String(formData.get('email') ?? '').trim(),
-		interest: String(formData.get('interest') ?? '').trim(),
 		message: String(formData.get('message') ?? '').trim()
 	};
 }
@@ -32,20 +31,37 @@ export const actions: Actions = {
 			return { success: true };
 		}
 
+		const fields = await loadContactFields();
+		const customValues = Object.fromEntries(
+			fields.map((field) => [
+				field.id,
+				String(formData.get(`field:${field.id}`) ?? '').trim()
+			])
+		);
+		const invalidCustomField = fields.some((field) => {
+			const value = customValues[field.id];
+			if (field.required && !value) return true;
+			if (!value) return false;
+			if (field.type === 'select' && !field.options.includes(value)) return true;
+			if (field.type === 'checkbox' && value !== 'yes') return true;
+			const maximum = field.type === 'textarea' ? 5000 : field.type === 'phone' ? 40 : 500;
+			return value.length > maximum;
+		});
+
 		if (
 			!values.name ||
 			values.name.length > 120 ||
 			!values.email ||
 			values.email.length > 254 ||
 			!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email) ||
-			!values.interest ||
-			values.interest.length > 120 ||
 			!values.message ||
-			values.message.length > 5000
+			values.message.length > 5000 ||
+			invalidCustomField
 		) {
 			return fail(400, {
 				message: 'Please complete every field with valid information.',
-				values
+				values,
+				customValues
 			});
 		}
 
@@ -56,10 +72,18 @@ export const actions: Actions = {
 			console.error('The resend_api_key secret is not configured.');
 			return fail(503, {
 				message: 'The contact form is temporarily unavailable. Please try again later.',
-				values
+				values,
+				customValues
 			});
 		}
 
+		const customLines = fields.map((field) => {
+			const value = customValues[field.id];
+			return `${field.label}: ${
+				field.type === 'checkbox' ? (value === 'yes' ? 'Yes' : 'No') : value || 'Not provided'
+			}`;
+		});
+		const interest = customValues.interest;
 		const response = await fetch(RESEND_ENDPOINT, {
 			method: 'POST',
 			headers: {
@@ -70,11 +94,11 @@ export const actions: Actions = {
 				from: FROM_EMAIL,
 				to: [TO_EMAIL],
 				reply_to: values.email,
-				subject: `Website inquiry from ${values.name}: ${values.interest}`,
+				subject: `Website inquiry from ${values.name}${interest ? `: ${interest}` : ''}`,
 				text: [
 					`Name: ${values.name}`,
 					`Email: ${values.email}`,
-					`Interest: ${values.interest}`,
+					...customLines,
 					'',
 					values.message
 				].join('\n')
@@ -85,7 +109,8 @@ export const actions: Actions = {
 			console.error('Resend rejected a contact form email.', response.status, await response.text());
 			return fail(502, {
 				message: 'Your message could not be sent. Please try again in a moment.',
-				values
+				values,
+				customValues
 			});
 		}
 

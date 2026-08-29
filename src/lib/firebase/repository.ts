@@ -33,6 +33,7 @@ import {
 } from '$lib/content/site';
 import {
 	defaultPageContent,
+	normalizePageContent,
 	pageContent,
 	type PageContent
 } from '$lib/content/page-content';
@@ -79,7 +80,9 @@ function startPublicListeners() {
 	onSnapshot(
 		doc(db, 'site', 'content'),
 		(snapshot) => {
-			if (snapshot.exists()) pageContent.set(snapshot.data().value as PageContent);
+			if (snapshot.exists()) {
+				pageContent.set(normalizePageContent(snapshot.data().value as PageContent));
+			}
 			firebaseConnection.set({ ready: true, syncing: false, error: '' });
 		},
 		reportError
@@ -250,16 +253,23 @@ async function subscriberId(email: string) {
 		.join('');
 }
 
-export async function subscribeToNewsletter(name: string, email: string) {
+export async function subscribeToNewsletter(
+	name: string,
+	email: string,
+	source: 'contact-form' | 'footer' = 'footer'
+) {
 	const database = requireDatabase();
 	const cleanEmail = email.trim().toLowerCase();
 	const id = await subscriberId(cleanEmail);
+	const consentedAt = new Date().toISOString();
 	const subscriber: Subscriber = {
 		id,
 		name: name.trim() || 'Newsletter reader',
 		email: cleanEmail,
-		joinedAt: new Date().toISOString().slice(0, 10),
-		status: 'active'
+		joinedAt: consentedAt.slice(0, 10),
+		status: 'active',
+		consentedAt,
+		source
 	};
 	await setDoc(doc(database, 'subscribers', id), subscriber);
 	return subscriber;

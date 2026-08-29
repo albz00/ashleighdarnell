@@ -37,13 +37,24 @@ service cloud.firestore {
 
     match /subscribers/{subscriberId} {
       allow read, update, delete: if isAdmin();
-      allow create: if
+      allow create: if isAdmin() || (
+        request.resource.data.keys().hasAll([
+          'id',
+          'name',
+          'email',
+          'joinedAt',
+          'status',
+          'consentedAt',
+          'source'
+        ]) &&
         request.resource.data.keys().hasOnly([
           'id',
           'name',
           'email',
           'joinedAt',
-          'status'
+          'status',
+          'consentedAt',
+          'source'
         ]) &&
         request.resource.data.id == subscriberId &&
         request.resource.data.email is string &&
@@ -52,7 +63,10 @@ service cloud.firestore {
         request.resource.data.name is string &&
         request.resource.data.name.size() <= 120 &&
         request.resource.data.joinedAt is string &&
-        request.resource.data.status == 'active';
+        request.resource.data.consentedAt is string &&
+        request.resource.data.source in ['contact-form', 'footer'] &&
+        request.resource.data.status == 'active'
+      );
     }
   }
 }

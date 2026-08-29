@@ -58,6 +58,8 @@ export type Subscriber = {
 	email: string;
 	joinedAt: string;
 	status: 'active' | 'unsubscribed';
+	consentedAt?: string;
+	source?: 'contact-form' | 'footer' | 'admin';
 };
 
 export type Campaign = {

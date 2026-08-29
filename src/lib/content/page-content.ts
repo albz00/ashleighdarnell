@@ -23,6 +23,17 @@ export type MediaContent = {
 
 export type NavItem = { label: string; href: string };
 
+export type ContactFieldType = 'text' | 'textarea' | 'phone' | 'select' | 'checkbox';
+
+export type ContactCustomField = {
+	id: string;
+	type: ContactFieldType;
+	label: string;
+	placeholder: string;
+	required: boolean;
+	options: string[];
+};
+
 export type PageContent = {
 	global: {
 		firstName: string;
@@ -113,12 +124,15 @@ export type PageContent = {
 		namePlaceholder: string;
 		emailLabel: string;
 		emailPlaceholder: string;
+		phoneLabel: string;
+		phonePlaceholder: string;
 		interestLabel: string;
 		interestOptions: string[];
 		messageLabel: string;
 		messagePlaceholder: string;
 		sendButton: string;
 		formNotice: string;
+		fields: ContactCustomField[];
 	};
 	blog: {
 		seoTitle: string;
@@ -333,12 +347,32 @@ export const defaultPageContent: PageContent = {
 		namePlaceholder: 'Your name',
 		emailLabel: 'Email',
 		emailPlaceholder: 'you@example.com',
+		phoneLabel: 'Phone number (optional)',
+		phonePlaceholder: '(555) 123-4567',
 		interestLabel: 'I’m interested in',
 		interestOptions: ['Photography', 'Social Media', 'Something else'],
 		messageLabel: 'Message',
 		messagePlaceholder: 'Tell me about your session or project...',
 		sendButton: 'Send',
-		formNotice: 'Your message will be sent directly to Ashleigh.'
+		formNotice: 'Your message will be sent directly to Ashleigh.',
+		fields: [
+			{
+				id: 'phone',
+				type: 'phone',
+				label: 'Phone number (optional)',
+				placeholder: '(555) 123-4567',
+				required: false,
+				options: []
+			},
+			{
+				id: 'interest',
+				type: 'select',
+				label: 'I’m interested in',
+				placeholder: '',
+				required: true,
+				options: ['Photography', 'Social Media', 'Something else']
+			}
+		]
 	},
 	blog: {
 		seoTitle: 'Journal - Ashleigh Darnell',
@@ -363,6 +397,94 @@ export interface ContentStorage<T> {
 	save(value: T): void;
 }
 
+function legacyContactFields(contact: Partial<PageContent['contact']>): ContactCustomField[] {
+	return [
+		{
+			id: 'phone',
+			type: 'phone',
+			label: contact.phoneLabel || defaultPageContent.contact.phoneLabel,
+			placeholder: contact.phonePlaceholder || defaultPageContent.contact.phonePlaceholder,
+			required: false,
+			options: []
+		},
+		{
+			id: 'interest',
+			type: 'select',
+			label: contact.interestLabel || defaultPageContent.contact.interestLabel,
+			placeholder: '',
+			required: true,
+			options:
+				contact.interestOptions?.filter((option) => typeof option === 'string') ||
+				defaultPageContent.contact.interestOptions
+		}
+	];
+}
+
+export function normalizeContactFields(fields: unknown): ContactCustomField[] {
+	if (!Array.isArray(fields)) return [];
+	const validTypes: ContactFieldType[] = ['text', 'textarea', 'phone', 'select', 'checkbox'];
+	const seen = new Set<string>();
+
+	return fields.slice(0, 20).flatMap((value, index) => {
+		if (!value || typeof value !== 'object') return [];
+		const candidate = value as Partial<ContactCustomField>;
+		const baseId =
+			typeof candidate.id === 'string'
+				? candidate.id.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 48)
+				: '';
+		let id = baseId || `field-${index + 1}`;
+		while (seen.has(id)) id = `${id}-${index + 1}`;
+		seen.add(id);
+		const type = validTypes.includes(candidate.type as ContactFieldType)
+			? (candidate.type as ContactFieldType)
+			: 'text';
+		const options =
+			type === 'select' && Array.isArray(candidate.options)
+				? candidate.options
+						.filter((option): option is string => typeof option === 'string')
+						.map((option) => option.trim().slice(0, 120))
+						.filter(Boolean)
+						.slice(0, 30)
+				: [];
+
+		return [
+			{
+				id,
+				type,
+				label:
+					typeof candidate.label === 'string' && candidate.label.trim()
+						? candidate.label.trim().slice(0, 120)
+						: `Field ${index + 1}`,
+				placeholder:
+					typeof candidate.placeholder === 'string'
+						? candidate.placeholder.trim().slice(0, 160)
+						: '',
+				required: candidate.required === true,
+				options
+			}
+		];
+	});
+}
+
+export function normalizePageContent(value: PageContent): PageContent {
+	const contact = value?.contact ?? defaultPageContent.contact;
+	const rawFields =
+		Array.isArray(contact.fields)
+			? contact.fields
+			: legacyContactFields(contact);
+	const fields = normalizeContactFields(rawFields);
+
+	return {
+		...structuredClone(defaultPageContent),
+		...value,
+		contact: {
+			...structuredClone(defaultPageContent.contact),
+			...contact,
+			fields: structuredClone(fields)
+		}
+	};
+}
+
 class LocalContentStorage<T> implements ContentStorage<T> {
 	constructor(
 		private key: string,
@@ -374,7 +496,10 @@ class LocalContentStorage<T> implements ContentStorage<T> {
 		const saved = localStorage.getItem(this.key);
 		if (!saved) return structuredClone(this.defaults);
 		try {
-			return JSON.parse(saved) as T;
+			const value = JSON.parse(saved) as T;
+			return this.key === 'ashleigh.page-content'
+				? (normalizePageContent(value as PageContent) as T)
+				: value;
 		} catch {
 			return structuredClone(this.defaults);
 		}
