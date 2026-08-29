@@ -259,7 +259,7 @@
 				title: 'Blog introduction',
 				description: 'The heading and introduction above all blog posts.',
 				location: 'Blog → Hero',
-				keys: ['kicker', 'titleBefore', 'titleAccent', 'intro']
+				keys: ['titleBefore', 'titleAccent', 'intro']
 			},
 			{
 				id: 'blog.featured',

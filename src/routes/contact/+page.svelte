@@ -1,7 +1,11 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import Reveal from '$lib/components/Reveal.svelte';
 	import { pageContent } from '$lib/content/page-content';
+	import type { ActionData } from './$types';
 
+	let { form }: { form: ActionData } = $props();
+	let submitting = $state(false);
 	const contact = $derived($pageContent.contact);
 </script>
 
@@ -31,16 +35,32 @@
 
 		<Reveal delay={120}>
 			<form
+				method="POST"
 				class="space-y-6 rounded-[2.5rem] bg-mist p-6 md:p-8"
 				data-content-section="contact.form"
 				data-content-label="Contact → Inquiry form"
-				onsubmit={(e) => e.preventDefault()}
+				use:enhance={() => {
+					submitting = true;
+					return async ({ result, update }) => {
+						await update({ reset: result.type === 'success' });
+						submitting = false;
+					};
+				}}
 			>
+				<label class="hidden" aria-hidden="true">
+					Website
+					<input name="website" tabindex="-1" autocomplete="off" />
+				</label>
 				<div class="grid gap-6 sm:grid-cols-2">
 					<label class="block">
 						<span class="text-[11px] uppercase tracking-[0.2em] text-muted">{contact.nameLabel}</span>
 						<input
 							type="text"
+							name="name"
+							required
+							maxlength="120"
+							autocomplete="name"
+							value={form?.values?.name ?? ''}
 							class="mt-2 w-full rounded-2xl border border-line bg-mist/60 px-4 py-3 outline-none transition-all duration-200 focus:border-coral focus:bg-paper focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--color-coral)_18%,transparent)]"
 							placeholder={contact.namePlaceholder}
 						/>
@@ -49,6 +69,11 @@
 						<span class="text-[11px] uppercase tracking-[0.2em] text-muted">{contact.emailLabel}</span>
 						<input
 							type="email"
+							name="email"
+							required
+							maxlength="254"
+							autocomplete="email"
+							value={form?.values?.email ?? ''}
 							class="mt-2 w-full rounded-2xl border border-line bg-mist/60 px-4 py-3 outline-none transition-all duration-200 focus:border-coral focus:bg-paper focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--color-coral)_18%,transparent)]"
 							placeholder={contact.emailPlaceholder}
 						/>
@@ -58,30 +83,44 @@
 				<label class="block">
 					<span class="text-[11px] uppercase tracking-[0.2em] text-muted">{contact.interestLabel}</span>
 					<select
+						name="interest"
+						required
 						class="mt-2 w-full rounded-2xl border border-line bg-mist/60 px-4 py-3 outline-none transition-all duration-200 focus:border-coral focus:bg-paper focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--color-coral)_18%,transparent)]"
 					>
-						{#each contact.interestOptions as option}<option>{option}</option>{/each}
+						{#each contact.interestOptions as option}
+							<option selected={form?.values?.interest === option}>{option}</option>
+						{/each}
 					</select>
 				</label>
 
 				<label class="block">
 					<span class="text-[11px] uppercase tracking-[0.2em] text-muted">{contact.messageLabel}</span>
 					<textarea
+						name="message"
+						required
+						maxlength="5000"
 						rows="5"
 						class="mt-2 w-full resize-none rounded-2xl border border-line bg-mist/60 px-4 py-3 outline-none transition-all duration-200 focus:border-coral focus:bg-paper focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--color-coral)_18%,transparent)]"
 						placeholder={contact.messagePlaceholder}
-					></textarea>
+					>{form?.values?.message ?? ''}</textarea>
 				</label>
 
 				<button
 					type="submit"
+					disabled={submitting}
 					class="btn-fun inline-flex items-center gap-2 rounded-full border border-violet bg-violet px-9 py-4 text-[12px] uppercase tracking-[0.2em] text-paper hover:border-ink hover:bg-ink"
 				>
-					{contact.sendButton}
+					{submitting ? 'Sending…' : contact.sendButton}
 				</button>
-				<p class="text-xs text-muted">
-					{contact.formNotice}
-				</p>
+				{#if form?.success || form?.message}
+					<p
+						class:text-coral={form?.success}
+						class="text-xs text-muted"
+						aria-live="polite"
+					>
+						{form.success ? 'Thanks! Your message has been sent.' : form.message}
+					</p>
+				{/if}
 			</form>
 		</Reveal>
 	</div>

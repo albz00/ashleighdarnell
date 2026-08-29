@@ -18,12 +18,14 @@ import { get, writable, type Writable } from 'svelte/store';
 import {
 	banners,
 	campaigns,
+	cursorSettings,
 	effectSettings,
 	posts,
 	selectedTheme,
 	subscribers,
 	type BlogPost,
 	type Campaign,
+	type CursorSettings,
 	type EffectSettings,
 	type SiteBanner,
 	type Subscriber,
@@ -96,6 +98,9 @@ function startPublicListeners() {
 						effect: data.effects.effect ?? 'auto'
 					} as EffectSettings);
 				}
+				cursorSettings.set({
+					cursor: data.cursor?.cursor ?? 'meadow'
+				} as CursorSettings);
 			}
 			firebaseConnection.set({ ready: true, syncing: false, error: '' });
 		},
@@ -148,7 +153,8 @@ async function seedEmptyProject() {
 	if (!settingsSnapshot.exists()) {
 		await setDoc(settingsReference, {
 			theme: get(selectedTheme),
-			effects: get(effectSettings)
+			effects: get(effectSettings),
+			cursor: get(cursorSettings)
 		});
 	}
 
@@ -189,9 +195,13 @@ export async function savePageContent(value: PageContent) {
 	await setDoc(doc(requireDatabase(), 'site', 'content'), { value });
 }
 
-export async function saveSiteSettings(theme: ThemeId, effects: EffectSettings) {
+export async function saveSiteSettings(
+	theme: ThemeId,
+	effects: EffectSettings,
+	cursor: CursorSettings
+) {
 	requireAdmin();
-	await setDoc(doc(requireDatabase(), 'site', 'settings'), { theme, effects });
+	await setDoc(doc(requireDatabase(), 'site', 'settings'), { theme, effects, cursor });
 }
 
 export async function savePost(post: BlogPost) {

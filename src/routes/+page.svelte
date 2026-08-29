@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import Placeholder from '$lib/components/Placeholder.svelte';
 	import Reveal from '$lib/components/Reveal.svelte';
 	import Wave from '$lib/components/Wave.svelte';
@@ -6,6 +7,18 @@
 	import { rotateMedia } from '$lib/actions/rotate-media';
 
 	const home = $derived($pageContent.home);
+	let showIntro = $state(true);
+	let introLeaving = $state(false);
+
+	onMount(() => {
+		const leaveTimer = window.setTimeout(() => (introLeaving = true), 550);
+		const removeTimer = window.setTimeout(() => (showIntro = false), 800);
+
+		return () => {
+			window.clearTimeout(leaveTimer);
+			window.clearTimeout(removeTimer);
+		};
+	});
 </script>
 
 <svelte:head>
@@ -13,6 +26,18 @@
 	<meta name="description" content={home.seoDescription} />
 	<link rel="preload" as="image" href={home.background.src} fetchpriority="high" />
 </svelte:head>
+
+{#if showIntro}
+	<div
+		class="home-intro"
+		class:home-intro-leaving={introLeaving}
+		role="status"
+		aria-label="Loading Ashleigh Darnell"
+	>
+		<p><span>Ashleigh</span> <em>Darnell</em></p>
+		<div aria-hidden="true"></div>
+	</div>
+{/if}
 
 <!-- ============ 01 · HERO ============ -->
 <section
@@ -195,6 +220,131 @@
 		</div>
 	</div>
 </section>
+
+<style>
+	.home-intro {
+		position: fixed;
+		z-index: 1000;
+		inset: 0;
+		display: grid;
+		place-content: center;
+		gap: 1rem;
+		overflow: hidden;
+		background: var(--color-paper);
+		color: var(--color-ink);
+		transition:
+			opacity 250ms ease,
+			visibility 250ms ease;
+	}
+
+	.home-intro::before,
+	.home-intro::after {
+		position: absolute;
+		width: 13rem;
+		height: 13rem;
+		border-radius: 999px;
+		content: '';
+		filter: blur(1px);
+		opacity: 0.7;
+		animation: intro-shape 600ms ease-out both;
+	}
+
+	.home-intro::before {
+		top: -5rem;
+		right: -4rem;
+		background: var(--color-blush);
+	}
+
+	.home-intro::after {
+		bottom: -6rem;
+		left: -4rem;
+		background: var(--color-mint);
+		animation-delay: 60ms;
+	}
+
+	.home-intro p {
+		position: relative;
+		z-index: 1;
+		margin: 0;
+		font-family: var(--font-display);
+		font-size: clamp(2.6rem, 8vw, 5rem);
+		line-height: 1;
+		letter-spacing: -0.04em;
+		animation: intro-name 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+	}
+
+	.home-intro em {
+		font-family: var(--font-cursive);
+		font-size: 1.2em;
+		font-weight: 700;
+		color: var(--color-coral);
+	}
+
+	.home-intro > div {
+		position: relative;
+		z-index: 1;
+		width: 100%;
+		height: 2px;
+		overflow: hidden;
+		background: var(--color-line);
+	}
+
+	.home-intro > div::after {
+		display: block;
+		width: 100%;
+		height: 100%;
+		background: var(--color-teal);
+		content: '';
+		transform-origin: left;
+		animation: intro-line 650ms ease-out both;
+	}
+
+	.home-intro-leaving {
+		visibility: hidden;
+		opacity: 0;
+	}
+
+	@keyframes intro-name {
+		from {
+			opacity: 0;
+			transform: translateY(0.75rem);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@keyframes intro-line {
+		from {
+			transform: scaleX(0);
+		}
+		to {
+			transform: scaleX(1);
+		}
+	}
+
+	@keyframes intro-shape {
+		from {
+			opacity: 0;
+			transform: scale(0.75);
+		}
+		to {
+			opacity: 0.7;
+			transform: scale(1);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.home-intro,
+		.home-intro::before,
+		.home-intro::after,
+		.home-intro p,
+		.home-intro > div::after {
+			animation: none;
+		}
+	}
+</style>
 
 <!-- ============ 03 · ABOUT (teal) ============ -->
 <Wave fill="teal" size="lg" class="bg-blush" />

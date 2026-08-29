@@ -8,22 +8,18 @@
 	const factStyles = [
 		{
 			bg: 'bg-blush',
-			accent: 'text-coral',
 			span: 'md:col-span-7'
 		},
 		{
 			bg: 'bg-butter',
-			accent: 'text-marigold',
 			span: 'md:col-span-5'
 		},
 		{
 			bg: 'bg-mint',
-			accent: 'text-teal',
 			span: 'md:col-span-5'
 		},
 		{
 			bg: 'bg-lilac',
-			accent: 'text-violet',
 			span: 'md:col-span-7'
 		}
 	];
@@ -91,16 +87,9 @@
 			{#each about.facts as fact, i (fact.text)}
 				<Reveal delay={i * 90} class={factStyles[i]?.span ?? ''}>
 					<article
-						class="card-lift group relative h-full min-h-56 overflow-hidden rounded-[2.25rem] p-7 md:p-9 {factStyles[i]?.bg ?? 'bg-blush'}"
+						class="fact-bubble card-lift relative mb-4 h-full min-h-56 rounded-[2.25rem] p-7 md:p-9 {factStyles[i]?.bg ?? 'bg-blush'}"
 					>
-						<span
-							class="absolute -right-3 -top-10 font-display text-[8rem] leading-none opacity-[0.07] transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110"
-							>{i + 1}</span
-						>
-						<p class="text-[11px] font-semibold uppercase tracking-[0.22em] {factStyles[i]?.accent ?? 'text-coral'}">
-							{fact.kicker}
-						</p>
-						<h3 class="font-display mt-8 max-w-md text-3xl leading-tight md:text-4xl">
+						<h3 class="font-display max-w-md text-3xl leading-tight md:text-4xl">
 							{fact.title}
 						</h3>
 						<p class="mt-4 max-w-xl text-sm leading-relaxed text-ink/65">{fact.text}</p>
@@ -111,16 +100,59 @@
 
 		<Reveal delay={160}>
 			<div
-				class="mt-5 flex flex-col gap-3 rounded-[2rem] bg-teal px-7 py-6 text-paper md:flex-row md:items-center md:justify-between md:px-9"
+				class="camera-bubble mt-7 grid items-center gap-5 rounded-[2rem] bg-teal px-7 py-6 text-paper sm:grid-cols-[10rem_1fr] md:grid-cols-[12rem_1fr] md:px-9"
 			>
-				<p class="font-display text-2xl">{about.gearTitle}</p>
-				<p class="text-sm text-paper/70">
-					{about.gearText}
-				</p>
+				<img
+					src="https://imagedelivery.net/FvOXf_HoZxDXgXU5xPiCfw/58e4db61-b4ea-4a57-3cc5-e8208facbf00/public"
+					alt="Illustration of Ashleigh’s Canon camera and lenses"
+					class="mx-auto w-36 drop-shadow-[0_10px_14px_rgba(0,0,0,0.18)] sm:w-40 md:w-48"
+					loading="lazy"
+				/>
+				<div>
+					<p class="font-display text-2xl md:text-3xl">{about.gearTitle}</p>
+					<p class="mt-3 text-sm leading-relaxed text-paper/75">
+						{about.gearText}
+					</p>
+				</div>
 			</div>
 		</Reveal>
 	</div>
 </section>
+
+<style>
+	.fact-bubble {
+		filter: drop-shadow(0 3px 0 color-mix(in srgb, var(--color-ink) 10%, transparent));
+	}
+
+	.fact-bubble::after {
+		position: absolute;
+		bottom: -0.9rem;
+		left: 2.5rem;
+		width: 1.8rem;
+		height: 1.8rem;
+		background: inherit;
+		clip-path: polygon(0 0, 100% 0, 0 100%);
+		content: '';
+	}
+
+	.camera-bubble {
+		position: relative;
+		box-shadow: 0 12px 28px color-mix(in srgb, var(--color-teal) 20%, transparent);
+	}
+
+	.camera-bubble::after {
+		position: absolute;
+		bottom: -0.9rem;
+		left: 2.5rem;
+		width: 1.8rem;
+		height: 1.8rem;
+		border-radius: 0 0 0 0.45rem;
+		background: var(--color-teal);
+		clip-path: polygon(0 0, 100% 0, 0 100%);
+		content: '';
+	}
+
+</style>
 
 <Wave fill="violet" size="lg" class="bg-mist" />
 <section class="bg-violet text-paper" data-content-section="about.cta" data-content-label="About → Contact callout">

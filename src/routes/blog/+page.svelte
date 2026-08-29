@@ -22,8 +22,7 @@
 <section class="backdrop-mountains bg-paper" data-content-section="blog.hero" data-content-label="Blog → Hero">
 	<div class="mx-auto max-w-6xl px-5 pb-16 pt-20 md:px-8 md:pb-20 md:pt-28">
 		<Reveal>
-			<p class="home-kicker text-coral">{blog.kicker}</p>
-			<h1 class="page-display font-display mt-5 max-w-4xl">
+			<h1 class="page-display font-display max-w-4xl">
 				{blog.titleBefore} <span class="font-cursive text-[1.15em] text-coral">{blog.titleAccent}</span>
 			</h1>
 			<p class="mt-6 max-w-xl leading-relaxed text-muted">

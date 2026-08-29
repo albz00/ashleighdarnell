@@ -1,20 +1,36 @@
 <script lang="ts">
+	import butterflyCursor from '$lib/assets/cursors/butterfly.svg';
+	import cameraCursor from '$lib/assets/cursors/camera.svg';
+	import meadowCursor from '$lib/assets/cursors/meadow.svg';
+	import sparkleCursor from '$lib/assets/cursors/sparkle.svg';
+	import wildflowerCursor from '$lib/assets/cursors/wildflower.svg';
 	import type {
+		CursorId,
+		CursorSettings,
 		EffectId,
 		EffectIntensity,
 		EffectSettings,
 		ThemeId
 	} from '$lib/content/site';
-	import { effectSettings, selectedTheme, themeOptions } from '$lib/content/site';
+	import { cursorSettings, effectSettings, selectedTheme, themeOptions } from '$lib/content/site';
 	import { saveSiteSettings } from '$lib/firebase/repository';
 
 	let preview = $state<ThemeId>($selectedTheme);
 	let notice = $state('');
-	let activeTab = $state<'themes' | 'effects'>('themes');
+	let activeTab = $state<'themes' | 'effects' | 'cursor'>('themes');
 	let effectDraft = $state<EffectSettings>({
 		...$effectSettings,
 		effect: $effectSettings.effect ?? 'auto'
 	});
+	let cursorDraft = $state<CursorSettings>({ ...$cursorSettings });
+
+	const cursorPreviews: Array<{ id: CursorId; name: string; icon: string; description: string }> = [
+		{ id: 'meadow', name: 'Meadow Arrow', icon: meadowCursor, description: 'A pine-green pointer with a warm golden dot.' },
+		{ id: 'wildflower', name: 'Wildflower', icon: wildflowerCursor, description: 'A coral bloom for an outdoorsy, playful feel.' },
+		{ id: 'sparkle', name: 'Story Spark', icon: sparkleCursor, description: 'A violet star with a little editorial magic.' },
+		{ id: 'camera', name: 'Tiny Camera', icon: cameraCursor, description: 'A miniature camera made for a photographer’s site.' },
+		{ id: 'butterfly', name: 'Meadow Butterfly', icon: butterflyCursor, description: 'A soft teal butterfly inspired by summer trails.' }
+	];
 
 	const effectPreviews: Array<{ id: EffectId; name: string; symbols: string; description: string }> = [
 		{ id: 'auto', name: 'Match the theme', symbols: '✦', description: 'Automatically use the effect paired with the current seasonal theme.' },
@@ -29,7 +45,7 @@
 
 	async function applyTheme() {
 		try {
-			await saveSiteSettings(preview, $effectSettings);
+			await saveSiteSettings(preview, $effectSettings, $cursorSettings);
 			$selectedTheme = preview;
 			notice = 'Theme saved to the server and applied across the website.';
 		} catch (error) {
@@ -44,11 +60,21 @@
 
 	async function saveEffects() {
 		try {
-			await saveSiteSettings($selectedTheme, effectDraft);
+			await saveSiteSettings($selectedTheme, effectDraft, $cursorSettings);
 			$effectSettings = { ...effectDraft };
 			notice = 'Seasonal effects saved to the server and applied to the website.';
 		} catch (error) {
 			notice = error instanceof Error ? error.message : 'Effects could not be saved.';
+		}
+	}
+
+	async function saveCursor() {
+		try {
+			await saveSiteSettings($selectedTheme, $effectSettings, cursorDraft);
+			$cursorSettings = { ...cursorDraft };
+			notice = 'Mouse cursor saved to the server and applied to the website.';
+		} catch (error) {
+			notice = error instanceof Error ? error.message : 'Cursor could not be saved.';
 		}
 	}
 </script>
@@ -77,6 +103,12 @@
 			class="rounded-full px-6 py-2.5 text-sm {activeTab === 'effects' ? 'bg-ink text-paper' : 'text-muted'}"
 		>
 			Effects
+		</button>
+		<button
+			onclick={() => (activeTab = 'cursor')}
+			class="rounded-full px-6 py-2.5 text-sm {activeTab === 'cursor' ? 'bg-ink text-paper' : 'text-muted'}"
+		>
+			Cursor
 		</button>
 	</div>
 
@@ -123,7 +155,7 @@
 			<p class="text-sm">Previewing <strong>{themeOptions.find((theme) => theme.id === preview)?.name}</strong></p>
 			<button onclick={applyTheme} class="rounded-full bg-coral px-6 py-3 text-xs font-semibold text-paper">Apply to website</button>
 		</div>
-	{:else}
+	{:else if activeTab === 'effects'}
 		<section class="mt-7 rounded-[2rem] bg-paper p-6 md:p-8">
 			<div class="flex flex-wrap items-center justify-between gap-5">
 				<div>
@@ -198,6 +230,48 @@
 			<p class="text-sm text-paper/65">Changes do not go live until you save them.</p>
 			<button onclick={saveEffects} class="rounded-full bg-coral px-7 py-3 text-xs font-semibold text-paper">
 				Save effects
+			</button>
+		</div>
+	{:else}
+		<section class="mt-7 rounded-[2rem] bg-paper p-6 md:p-8">
+			<h2 class="font-display text-3xl">Mouse cursor</h2>
+			<p class="mt-2 max-w-xl text-sm leading-relaxed text-muted">
+				Choose a tiny finishing touch for the public website. Hover over each option to try it.
+			</p>
+		</section>
+
+		<div class="mt-5 grid gap-4 md:grid-cols-2">
+			{#each cursorPreviews as item}
+				<button
+					onclick={() => {
+						cursorDraft = { cursor: item.id };
+						notice = '';
+					}}
+					data-cursor-preview={item.id}
+					class="group rounded-[2rem] border bg-paper p-6 text-left transition-all {cursorDraft.cursor === item.id
+						? 'border-coral ring-2 ring-coral'
+						: 'border-line hover:border-ink/25'}"
+				>
+					<div class="flex items-start justify-between gap-5">
+						<div>
+							<h3 class="font-display text-2xl">{item.name}</h3>
+							<p class="mt-2 text-sm text-muted">{item.description}</p>
+						</div>
+						<span class="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-mist transition-transform group-hover:scale-110">
+							<img src={item.icon} alt="" class="h-10 w-10 [image-rendering:auto]" />
+						</span>
+					</div>
+					<p class="mt-5 text-xs {cursorDraft.cursor === item.id ? 'font-semibold text-coral' : 'text-muted'}">
+						{cursorDraft.cursor === item.id ? 'Selected — save to apply' : 'Hover to preview'}
+					</p>
+				</button>
+			{/each}
+		</div>
+
+		<div class="sticky bottom-5 mt-6 flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-ink px-6 py-4 text-paper shadow-xl">
+			<p class="text-sm text-paper/65">The custom cursor is applied on mouse and trackpad devices.</p>
+			<button onclick={saveCursor} class="rounded-full bg-coral px-7 py-3 text-xs font-semibold text-paper">
+				Save cursor
 			</button>
 		</div>
 	{/if}

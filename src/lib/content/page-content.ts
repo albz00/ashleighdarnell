@@ -338,7 +338,7 @@ export const defaultPageContent: PageContent = {
 		messageLabel: 'Message',
 		messagePlaceholder: 'Tell me about your session or project...',
 		sendButton: 'Send',
-		formNotice: 'The contact form is coming soon. For now, please email me directly.'
+		formNotice: 'Your message will be sent directly to Ashleigh.'
 	},
 	blog: {
 		seoTitle: 'Journal - Ashleigh Darnell',

@@ -19,6 +19,10 @@ export type EffectSettings = {
 	intensity: EffectIntensity;
 	effect: EffectId;
 };
+export type CursorId = 'meadow' | 'wildflower' | 'sparkle' | 'camera' | 'butterfly';
+export type CursorSettings = {
+	cursor: CursorId;
+};
 export type ThemeId =
 	| 'meadow'
 	| 'sunset'
@@ -296,6 +300,9 @@ export const effectSettings = persisted<EffectSettings>('ashleigh.effects', {
 	enabled: true,
 	intensity: 'medium',
 	effect: 'auto'
+});
+export const cursorSettings = persisted<CursorSettings>('ashleigh.cursor', {
+	cursor: 'meadow'
 });
 
 export const newId = (prefix: string) =>
